@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How I Met Your Mother — Trivia Challenge</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --amber:   #d4830a;
+      --gold:    #f5c842;
+      --cream:   #f0e0bc;
+      --text:    #e2cfaa;
+      --muted:   #8a7255;
+      --correct: #27ae60;
+      --wrong:   #c0392b;
+      /* theme-sensitive surfaces */
+      --body-bg:     #07050a;
+      --surface:     rgba(255,255,255,.03);
+      --surface-bd:  rgba(212,131,10,.18);
+      --overlay:     rgba(255,255,255,.025);
+      --overlay-bd:  rgba(255,255,255,.07);
+      --row-div:     rgba(255,255,255,.05);
+      --track-bg:    rgba(255,255,255,.07);
+      --choice-bg:   rgba(255,255,255,.035);
+      --choice-bd:   rgba(255,255,255,.09);
+      --lbl-bg:      rgba(255,255,255,.07);
+      --lbl-bd:      rgba(255,255,255,.12);
+      --ghost-bg:    rgba(255,255,255,.05);
+      --ghost-hover: rgba(255,255,255,.09);
+      --back-bg:     rgba(255,255,255,.06);
+      --back-hover:  rgba(255,255,255,.10);
+    }
+
+    [data-theme="light"] {
+      --text:        #2d180a;
+      --muted:       #805030;
+      --cream:       #3d2010;
+      --gold:        #b8860b;
+      --amber:       #b87010;
+      --body-bg:     #f2e4cc;
+      --surface:     rgba(0,0,0,.028);
+      --surface-bd:  rgba(160,100,20,.22);
+      --overlay:     rgba(0,0,0,.03);
+      --overlay-bd:  rgba(0,0,0,.10);
+      --row-div:     rgba(0,0,0,.06);
+      --track-bg:    rgba(0,0,0,.10);
+      --choice-bg:   rgba(0,0,0,.028);
+      --choice-bd:   rgba(0,0,0,.10);
+      --lbl-bg:      rgba(0,0,0,.07);
+      --lbl-bd:      rgba(0,0,0,.15);
+      --ghost-bg:    rgba(0,0,0,.04);
+      --ghost-hover: rgba(0,0,0,.07);
+      --back-bg:     rgba(0,0,0,.04);
+      --back-hover:  rgba(0,0,0,.08);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+      background: var(--body-bg);
+      transition: background .35s ease;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-x: hidden;
+      position: relative;
+      /* Yellow umbrella cursor */
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34' viewBox='0 0 28 34'%3E%3Cpath d='M14,2 C6.5,2 1,8 1,14 L27,14 C27,8 21.5,2 14,2Z' fill='%23FFD700'/%3E%3Cpath d='M14,2 C6.5,2 1,8 1,14 L14,14Z' fill='%23B8860B' opacity='0.45'/%3E%3Cline x1='14' y1='14' x2='14' y2='29' stroke='%23FFD700' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M14,29 Q14,33 10,33' fill='none' stroke='%23FFD700' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") 14 2, auto;
+    }
+
+    /* inherit custom cursor everywhere */
+    *, button, a { cursor: inherit; }
+    button:disabled { cursor: not-allowed; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 100% 45% at 50% 0%,   rgba(180,100,15,0.22) 0%, transparent 70%),
+        radial-gradient(ellipse 70%  40% at 10% 100%, rgba(80,40,5,0.35)    0%, transparent 70%),
+        radial-gradient(ellipse 70%  40% at 90% 100%, rgba(80,40,5,0.35)    0%, transparent 70%),
+        linear-gradient(170deg, #0a090e 0%, #140c02 45%, #0c0800 75%, #07050a 100%);
+      z-index: -1;
+    }
+
+    /* ── fairy lights ── */
+    #lights {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 0 11px;
+      z-index: 10;
+    }
+    .light {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      animation: bulb var(--d, 2s) ease-in-out infinite var(--dl, 0s);
+    }
+    @keyframes bulb {
+      0%,100% { opacity: .45; transform: scale(1);   }
+      50%      { opacity: 1;   transform: scale(1.2); }
+    }
+
+    /* ── card ── */
+    #card {
+      width: 100%;
+      max-width: 620px;
+      background: linear-gradient(160deg, #1a0d03 0%, #120a02 60%, #0e0800 100%);
+      border: 1px solid rgba(212,131,10,.26);
+      border-radius: 18px;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.6),
+        0 14px 55px rgba(0,0,0,.85),
+        0 0 80px rgba(180,100,15,.13),
+        inset 0 1px 0 rgba(255,200,80,.08);
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+    #card::before {
+      content: '';
+      display: block;
+      height: 7px;
+      background: repeating-linear-gradient(
+        90deg,
+        #7a3a10 0px, #9b4d18 8px, #7a3a10 16px,
+        #8b4513 24px, #c4712a 30px, #7a3a10 38px
+      );
+    }
+
+    /* ── screens ── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.35rem;
+      padding: 2.2rem 2rem 2.4rem;
+    }
+    .screen.active {
+      display: flex;
+      animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ── divider ── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,131,10,.35), transparent);
+      flex-shrink: 0;
+    }
+
+    /* ── buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      padding: .85rem 1.8rem;
+      border: none;
+      border-radius: 11px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: transform .15s, box-shadow .15s;
+      width: 100%;
+      max-width: 320px;
+      letter-spacing: .02em;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #be7408 0%, #eda820 60%, #f5c842 100%);
+      color: #0a0400;
+      font-weight: bold;
+      box-shadow: 0 4px 18px rgba(212,131,10,.45), inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .btn-gold:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,131,10,.55), inset 0 1px 0 rgba(255,255,255,.25); }
+    .btn-gold:active { transform: translateY(0); }
+    .btn-ghost {
+      background: var(--ghost-bg);
+      color: var(--text);
+      border: 1px solid var(--surface-bd);
+    }
+    .btn-ghost:hover { background: var(--ghost-hover); transform: translateY(-1px); }
+
+    /* ══════════════════════════════════════
+       WELCOME
+    ══════════════════════════════════════ */
+    .umbrella {
+      font-size: 5rem;
+      line-height: 1;
+      animation: float 3.5s ease-in-out infinite;
+      /* Make it yellow */
+      filter: hue-rotate(148deg) saturate(2.5) brightness(1.15)
+              drop-shadow(0 0 24px rgba(255,210,0,.75));
+      user-select: none;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0)    rotate(-4deg); }
+      50%      { transform: translateY(-10px) rotate(4deg); }
+    }
+
+    .welcome-title { text-align: center; }
+    .welcome-title h1 {
+      font-size: clamp(1.2rem, 4vw, 1.85rem);
+      color: var(--gold);
+      text-shadow: 0 0 28px rgba(245,200,66,.45);
+      line-height: 1.35;
+      letter-spacing: .03em;
+    }
+    .welcome-title .sub {
+      font-style: italic;
+      color: var(--muted);
+      font-size: .88rem;
+      margin-top: .35rem;
+    }
+
+    .tagline {
+      text-align: center;
+      line-height: 1.75;
+      font-size: .92rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .tagline strong { color: var(--amber); font-style: normal; }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: .7rem;
+      width: 100%;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--surface-bd);
+      border-radius: 10px;
+      padding: .85rem .5rem;
+      text-align: center;
+    }
+    .stat .sv { display: block; font-size: 1.5rem; color: var(--gold); }
+    .stat .sl {
+      display: block;
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-top: .2rem;
+      font-family: system-ui, sans-serif;
+    }
+
+    /* ══════════════════════════════════════
+       QUIZ
+    ══════════════════════════════════════ */
+    .quiz-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .q-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+    }
+    .score-pill {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(212,131,10,.12);
+      border: 1px solid rgba(212,131,10,.28);
+      border-radius: 99px;
+      padding: .28rem .85rem;
+      font-size: .82rem;
+      font-family: system-ui, sans-serif;
+      color: var(--gold);
+    }
+    #score-num {
+      font-weight: 700;
+      font-size: .95rem;
+      display: inline-block;
+    }
+    @keyframes scoreUp {
+      0%   { transform: scale(1);   color: var(--gold);    }
+      40%  { transform: scale(1.5); color: var(--correct); }
+      100% { transform: scale(1);   color: var(--gold);    }
+    }
+    .score-bump { animation: scoreUp .45s ease both; }
+
+    /* progress */
+    .prog-track {
+      width: 100%;
+      height: 5px;
+      background: var(--track-bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c87b0a, #f5c842);
+      border-radius: 3px;
+      transition: width .55s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 0 8px rgba(245,200,66,.6);
+    }
+
+    /* question box */
+    .q-box {
+      width: 100%;
+      background: var(--overlay);
+      border: 1px solid var(--overlay-bd);
+      border-radius: 13px;
+      padding: 1.4rem 1.5rem;
+    }
+    .q-text {
+      font-size: clamp(.95rem, 2.5vw, 1.15rem);
+      line-height: 1.65;
+      color: var(--cream);
+      text-align: center;
+    }
+
+    /* choices */
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .65rem;
+      width: 100%;
+    }
+    .choice {
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+      padding: .8rem .9rem;
+      background: var(--choice-bg);
+      border: 1.5px solid var(--choice-bd);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: .88rem;
+      font-family: inherit;
+      text-align: left;
+      line-height: 1.45;
+      transition: background .18s, border-color .18s, transform .15s;
+    }
+    .choice:hover:not(:disabled) {
+      background: rgba(212,131,10,.1);
+      border-color: rgba(212,131,10,.38);
+      transform: translateY(-1px);
+    }
+    .choice:disabled { cursor: not-allowed; }
+    .lbl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--lbl-bg);
+      border: 1px solid var(--lbl-bd);
+      font-size: .72rem;
+      font-weight: 700;
+      font-family: system-ui, sans-serif;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: background .18s, border-color .18s;
+    }
+    .choice.correct                { background: rgba(39,174,96,.14); border-color: #27ae60; color: #b2ffd0; }
+    .choice.correct .lbl           { background: #27ae60; border-color: #27ae60; color: #fff; }
+    .choice.wrong                  { background: rgba(192,57,43,.14);  border-color: #c0392b; color: #ffc2bb; }
+    .choice.wrong .lbl             { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+    /* feedback */
+    .feedback {
+      width: 100%;
+      padding: .9rem 1.1rem;
+      border-radius: 10px;
+      font-size: .875rem;
+      line-height: 1.55;
+      text-align: center;
+      display: none;
+      animation: fadeUp .3s ease both;
+    }
+    .feedback.ok  { display: block; background: rgba(39,174,96,.1);  border: 1px solid rgba(39,174,96,.3);  color: #b2ffd0; }
+    .feedback.err { display: block; background: rgba(192,57,43,.1);  border: 1px solid rgba(192,57,43,.3);  color: #ffc2bb; }
+
+    /* ── NAV ROW (back / forward) ── */
+    .nav-row {
+      display: flex;
+      gap: .6rem;
+      width: 100%;
+    }
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      padding: .78rem 1rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .9rem;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+      flex: 1;
+      font-weight: 600;
+      letter-spacing: .02em;
+      border: none;
+    }
+    .btn-back {
+      background: var(--back-bg);
+      color: var(--text);
+      border: 1px solid var(--surface-bd);
+    }
+    .btn-back:hover { background: var(--back-hover); transform: translateY(-1px); }
+    .btn-back:active { transform: translateY(0); }
+
+    .btn-fwd {
+      background: linear-gradient(135deg, #be7408 0%, #eda820 60%, #f5c842 100%);
+      color: #0a0400;
+      font-weight: bold;
+      box-shadow: 0 4px 18px rgba(212,131,10,.45), inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .btn-fwd:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(212,131,10,.55), inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .btn-fwd:active:not(:disabled) { transform: translateY(0); }
+    .btn-fwd:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ══════════════════════════════════════
+       RESULTS
+    ══════════════════════════════════════ */
+    .result-emoji {
+      font-size: 4.5rem;
+      animation: float 3s ease-in-out infinite;
+      user-select: none;
+    }
+    .stars-row { display: flex; gap: .35rem; font-size: 1.6rem; }
+    .star { opacity: .15; }
+
+    .big-score-block { text-align: center; }
+    .big-score {
+      display: block;
+      font-size: 4rem;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(245,200,66,.5);
+      line-height: 1;
+    }
+    .score-caption { display: block; font-size: .9rem; color: var(--muted); margin-top: .3rem; }
+
+    .result-msg {
+      text-align: center;
+      font-style: italic;
+      color: var(--cream);
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 420px;
+    }
+
+    .breakdown {
+      width: 100%;
+      background: var(--overlay);
+      border: 1px solid var(--overlay-bd);
+      border-radius: 12px;
+      padding: .8rem 1rem;
+    }
+    .brow {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .45rem 0;
+      font-size: .82rem;
+      font-family: system-ui, sans-serif;
+      border-bottom: 1px solid var(--row-div);
+    }
+    .brow:last-child { border-bottom: none; }
+    .brow .bq  { flex: 1; color: var(--muted); }
+    .brow .br  { font-weight: 700; flex-shrink: 0; }
+    .brow .ok  { color: #27ae60; }
+    .brow .no  { color: #c0392b; }
+
+    .result-btns {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .65rem;
+      width: 100%;
+    }
+
+    /* card footer */
+    #card-foot {
+      text-align: center;
+      padding: .6rem;
+      font-size: .68rem;
+      color: rgba(138,114,85,.35);
+      font-family: system-ui, sans-serif;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border-top: 1px solid rgba(255,255,255,.04);
+    }
+
+    /* ── DIFFICULTY SCREEN ──────────────── */
+    .diff-header { text-align: center; }
+    .diff-subtitle { color: var(--muted); font-size: .9rem; margin-top: .3rem; }
+    .diff-cards {
+      display: flex;
+      gap: .7rem;
+      width: 100%;
+    }
+    .diff-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .32rem;
+      padding: 1.1rem .6rem 1.2rem;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .15s;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .diff-card:hover { background: var(--ghost-hover); transform: translateY(-3px); }
+    .diff-card:active { transform: translateY(-1px); }
+    .diff-icon { font-size: 2rem; line-height: 1.1; }
+    .diff-name { font-family: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif; font-size: 1.05rem; font-weight: 700; margin-top: .1rem; }
+    .diff-secs { font-size: .76rem; font-weight: 700; padding: .18rem .5rem; border-radius: 999px; margin-top: .1rem; }
+    .diff-desc { font-size: .69rem; color: var(--muted); text-align: center; margin-top: .1rem; }
+    .diff-best {
+      font-size: .67rem;
+      font-family: system-ui, sans-serif;
+      font-weight: 700;
+      color: var(--gold);
+      opacity: .85;
+      min-height: .85rem;
+      text-align: center;
+    }
+    .diff-easy  { border-color: rgba(39,174,96,.3); }
+    .diff-easy:hover  { border-color: #27ae60; }
+    .diff-easy  .diff-secs { background: rgba(39,174,96,.15);  color: #5dbb7a; }
+    .diff-med   { border-color: rgba(245,200,66,.3); }
+    .diff-med:hover   { border-color: var(--gold); }
+    .diff-med   .diff-secs { background: rgba(245,200,66,.15); color: var(--gold); }
+    .diff-hard  { border-color: rgba(231,76,60,.3); }
+    .diff-hard:hover  { border-color: #e74c3c; }
+    .diff-hard  .diff-secs { background: rgba(231,76,60,.15);  color: #e74c3c; }
+
+    /* ── TIMER ────────────────────────────── */
+    .timer-pill {
+      display: flex;
+      align-items: center;
+      gap: .22rem;
+      font-size: .76rem;
+      font-family: system-ui, sans-serif;
+      color: var(--muted);
+    }
+    #timer-num {
+      font-size: .95rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      min-width: 1.8ch;
+      transition: color .4s;
+    }
+    .timer-track {
+      width: 100%;
+      height: 4px;
+      background: var(--track-bg);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 2px;
+      transition: width 1s linear, background .5s;
+    }
+
+    /* ── diff badge (used in scoreboard rows) */
+    .diff-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: .64rem;
+      font-weight: 800;
+      padding: .12rem .4rem;
+      border-radius: 999px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-right: .25rem;
+    }
+    .diff-badge.easy   { background: rgba(39,174,96,.15);  color: #5dbb7a; }
+    .diff-badge.medium { background: rgba(245,200,66,.15); color: var(--gold); }
+    .diff-badge.hard   { background: rgba(231,76,60,.15);  color: #e74c3c; }
+
+    /* ── SCOREBOARD ──────────────────────── */
+    .scoreboard-wrap { width: 100%; }
+    .new-record-banner {
+      text-align: center;
+      font-family: var(--serif);
+      color: var(--gold);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      animation: scoreUp .6s ease both;
+      margin-bottom: .6rem;
+    }
+    .scoreboard {
+      width: 100%;
+      background: var(--overlay);
+      border: 1px solid var(--surface-bd);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .sb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .55rem .9rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--overlay-bd);
+    }
+    .sb-title {
+      font-family: var(--body, system-ui);
+      font-size: .88rem;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .sb-best {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      background: linear-gradient(135deg,#7a4f00,var(--gold));
+      color: #1a0d00;
+      font-size: .7rem;
+      font-weight: 900;
+      padding: .18rem .5rem;
+      border-radius: 999px;
+      letter-spacing: .02em;
+    }
+    .sb-clear {
+      background: none;
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size: .7rem;
+      padding: .18rem .5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .sb-clear:hover { color: #ff6b6b; border-color: rgba(255,107,107,.5); }
+    .sb-row {
+      display: grid;
+      grid-template-columns: 2rem 1fr 2.8rem auto;
+      align-items: center;
+      gap: .5rem;
+      padding: .48rem .9rem;
+      font-size: .81rem;
+      font-family: system-ui, sans-serif;
+      border-bottom: 1px solid var(--row-div);
+    }
+    .sb-row:last-child { border-bottom: none; }
+    .sb-row.sb-current { background: var(--surface); }
+    .sb-rank { color: var(--muted); font-size: .76rem; text-align: center; }
+    .sb-bar  { height: 5px; background: var(--track-bg); border-radius: 4px; overflow: hidden; }
+    .sb-bar-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 4px;
+      background: linear-gradient(90deg,var(--amber),var(--gold));
+      transition: width .75s cubic-bezier(.22,1,.36,1);
+    }
+    .sb-pts  { color: var(--gold); font-weight: 700; text-align: right; font-size: .82rem; }
+    .sb-date { color: var(--muted); font-size: .72rem; text-align: right; }
+
+    /* ── CTA ARROW ──────────────────────── */
+    .cta-arrow {
+      font-size: 1.3rem;
+      color: var(--amber);
+      animation: ctaBounce 1.4s ease-in-out infinite;
+      opacity: .75;
+      user-select: none;
+    }
+    @keyframes ctaBounce {
+      0%, 100% { transform: translateY(0);   opacity: .55; }
+      50%       { transform: translateY(7px); opacity: 1;   }
+    }
+
+    /* ── THEME TOGGLE BUTTON ───────────── */
+    #theme-toggle {
+      position: fixed;
+      top: .55rem;
+      right: .8rem;
+      z-index: 30;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .25s, border-color .25s, transform .18s;
+      padding: 0;
+      line-height: 1;
+    }
+    #theme-toggle:hover { transform: rotate(22deg) scale(1.12); background: rgba(0,0,0,.6); }
+
+    /* ── LIGHT MODE ─────────────────────── */
+    [data-theme="light"] body {
+      background: #f2e4cc;
+    }
+    [data-theme="light"] body::before {
+      background:
+        radial-gradient(ellipse 100% 45% at 50% 0%,   rgba(210,140,40,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 70%  40% at 10% 100%, rgba(170,110,30,.14) 0%, transparent 70%),
+        radial-gradient(ellipse 70%  40% at 90% 100%, rgba(170,110,30,.14) 0%, transparent 70%),
+        linear-gradient(170deg, #f5e8d0 0%, #eddbba 45%, #e7d0a5 75%, #f2e4cc 100%);
+    }
+    [data-theme="light"] #card {
+      background: linear-gradient(160deg, #fffbf4 0%, #fdf7ec 60%, #faf1e3 100%);
+      border-color: rgba(180,110,20,.28);
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.07),
+        0 14px 45px rgba(0,0,0,.13),
+        0 0 60px rgba(200,140,30,.10),
+        inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    [data-theme="light"] #theme-toggle {
+      background: rgba(255,255,255,.72);
+      border-color: rgba(0,0,0,.18);
+    }
+    [data-theme="light"] #theme-toggle:hover {
+      background: rgba(255,255,255,.9);
+      transform: rotate(22deg) scale(1.12);
+    }
+    [data-theme="light"] .score-pill {
+      background: rgba(180,110,10,.1);
+      border-color: rgba(180,110,10,.3);
+    }
+    [data-theme="light"] .feedback.ok {
+      background: rgba(39,174,96,.09);
+      border-color: rgba(39,174,96,.38);
+      color: #1a6e3a;
+    }
+    [data-theme="light"] .feedback.err {
+      background: rgba(192,57,43,.07);
+      border-color: rgba(192,57,43,.32);
+      color: #7a1e14;
+    }
+    [data-theme="light"] .choice.correct { color: #1a5e35; }
+    [data-theme="light"] .choice.wrong   { color: #7a1e14; }
+    [data-theme="light"] #card-foot {
+      color: rgba(100,65,30,.42);
+      border-top-color: rgba(0,0,0,.08);
+    }
+    [data-theme="light"] .sb-clear { color: #805030; border-color: rgba(0,0,0,.18); }
+    [data-theme="light"] .sb-clear:hover { color: #c0392b; border-color: rgba(192,57,43,.45); }
+    [data-theme="light"] .new-record-banner { color: #9a6b00; }
+    [data-theme="light"] .sb-best { background: linear-gradient(135deg,#a06800,#c89010); }
+    [data-theme="light"] .divider {
+      background: linear-gradient(90deg, transparent, rgba(180,110,20,.38), transparent);
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 480px) {
+      .screen  { padding: 1.6rem 1rem 2rem; gap: 1.1rem; }
+      .choices { grid-template-columns: 1fr; }
+      .umbrella { font-size: 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="lights"></div>
+<button id="theme-toggle" onclick="toggleTheme()" title="Switch light / dark mode">🌙</button>
+
+<div id="card">
+
+  <!-- ══ WELCOME ══ -->
+  <div id="welcome" class="screen active">
+    <div class="umbrella">☂️</div>
+
+    <div class="welcome-title">
+      <h1>How I Met Your Mother<br>Trivia Challenge</h1>
+      <p class="sub">MacLaren's Pub Edition</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="tagline">
+      Pull up a stool at <strong>MacLaren's</strong>.<br>
+      This is gonna be <strong>legen— wait for it —dary!</strong>
+    </p>
+
+    <div class="stat-row">
+      <div class="stat"><span class="sv">5</span><span class="sl">Questions</span></div>
+      <div class="stat"><span class="sv">☂️</span><span class="sl">Glory</span></div>
+    </div>
+
+    <div class="cta-arrow">▼</div>
+
+    <button class="btn btn-gold" onclick="showDifficulty()">☂️&nbsp;&nbsp;Start the Challenge</button>
+  </div>
+
+  <!-- ══ DIFFICULTY ══ -->
+  <div id="difficulty" class="screen">
+    <div class="diff-header">
+      <div class="umbrella" style="font-size:3rem">☂️</div>
+      <h2 style="font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;font-size:1.5rem;color:var(--gold);margin-top:.4rem">Choose Difficulty</h2>
+      <p class="diff-subtitle">How legendary are you feeling?</p>
+    </div>
+
+    <div class="diff-cards">
+      <button class="diff-card diff-easy" onclick="selectDifficulty('easy')">
+        <span class="diff-icon">🍺</span>
+        <span class="diff-name">Easy</span>
+        <span class="diff-secs">30 sec</span>
+        <span class="diff-desc">Casual fan</span>
+        <span class="diff-best" id="diff-best-easy"></span>
+      </button>
+      <button class="diff-card diff-med" onclick="selectDifficulty('medium')">
+        <span class="diff-icon">🎩</span>
+        <span class="diff-name">Medium</span>
+        <span class="diff-secs">20 sec</span>
+        <span class="diff-desc">MacLaren's regular</span>
+        <span class="diff-best" id="diff-best-medium"></span>
+      </button>
+      <button class="diff-card diff-hard" onclick="selectDifficulty('hard')">
+        <span class="diff-icon">🔥</span>
+        <span class="diff-name">Hard</span>
+        <span class="diff-secs">10 sec</span>
+        <span class="diff-desc">Legen-dary</span>
+        <span class="diff-best" id="diff-best-hard"></span>
+      </button>
+    </div>
+
+    <button class="btn btn-ghost" onclick="goHome()">← Back to Welcome</button>
+  </div>
+
+  <!-- ══ QUIZ ══ -->
+  <div id="quiz" class="screen">
+    <div class="quiz-topbar">
+      <span class="q-label" id="q-label">Question 1 of 5</span>
+      <div class="timer-pill" id="timer-pill">⏱ <span id="timer-num">–</span>s</div>
+      <div class="score-pill">☂️ <span id="score-num">0</span> / 5</div>
+    </div>
+
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+    <div class="timer-track">
+      <div class="timer-fill" id="timer-fill" style="width:100%;background:#27ae60"></div>
+    </div>
+
+    <div class="q-box">
+      <p class="q-text" id="q-text"></p>
+    </div>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <!-- Back / Forward navigation -->
+    <div class="nav-row">
+      <button class="btn-nav btn-back" id="back-btn" onclick="goBack()">← Back</button>
+      <button class="btn-nav btn-fwd"  id="fwd-btn"  onclick="goForward()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ══ RESULTS ══ -->
+  <div id="results" class="screen">
+    <div class="result-emoji" id="r-emoji">🍺</div>
+    <div class="stars-row" id="r-stars"></div>
+    <div class="big-score-block">
+      <span class="big-score" id="r-score">0</span>
+      <span class="score-caption">out of 5</span>
+    </div>
+    <p class="result-msg" id="r-msg"></p>
+    <div class="divider"></div>
+    <div class="breakdown" id="r-breakdown"></div>
+    <div id="r-scoreboard"></div>
+    <div class="result-btns">
+      <button class="btn btn-gold"  onclick="showDifficulty()">☂️&nbsp;&nbsp;Play Again</button>
+      <button class="btn btn-ghost" onclick="goHome()">← Back to Welcome</button>
+    </div>
+  </div>
+
+  <div id="card-foot">MacLaren's Pub · New York City · Est. 2005</div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   QUESTIONS
+───────────────────────────────────────── */
+const QUESTIONS = [
+  {
+    q: "What is the name of the bar where the gang always hangs out?",
+    opts: ["Central Perk", "MacLaren's Pub", "Paddy's Pub", "The Drunk Tank"],
+    a: 1,
+    exp: "MacLaren's Pub sits on the ground floor of the gang's apartment building — their true second home for all 9 seasons."
+  },
+  {
+    q: "What is Ted Mosby's career for most of the series?",
+    opts: ["Lawyer", "Doctor", "Architect", "Accountant"],
+    a: 2,
+    exp: "Ted is an architect who dreams of designing a great New York building — he later teaches architecture at Columbia University."
+  },
+  {
+    q: "Which country is Robin Scherbatsky originally from?",
+    opts: ["Australia", "United Kingdom", "New Zealand", "Canada"],
+    a: 3,
+    exp: "Robin is Canadian, and the show never lets her forget it. She was even a teen pop star there, known as 'Robin Sparkles'!"
+  },
+  {
+    q: "What is the real name of Ted's future wife, 'The Mother'?",
+    opts: ["Emily McConnell", "Tracy McConnell", "Tracy Marshall", "Amy Williams"],
+    a: 1,
+    exp: "Tracy McConnell is The Mother. She and Ted meet at Farhampton train station — she's holding the yellow umbrella."
+  },
+  {
+    q: "What colour is the iconic umbrella associated with 'The Mother'?",
+    opts: ["Red", "Blue", "Purple", "Yellow"],
+    a: 3,
+    exp: "The yellow umbrella is one of HIMYM's most recognisable symbols, representing Ted and Tracy's destined meeting."
+  }
+];
+
+const EMOJIS = ['😢','😕','🤔','😊','🍺','🏆'];
+const MSGS = [
+  "Oof… even Barney feels sorry for you. Maybe binge-watch the show one more time?",
+  "Not quite, but you'd get kicked out of MacLaren's with that score. Keep watching!",
+  "Decent! You know the show, but there's still room to become a true HIMYM legend.",
+  "Nice work! You're practically a regular at MacLaren's booth.",
+  "Impressive! Barney would say this calls for a celebratory high-five.",
+  "LEGEN— wait for it —DARY! You're the ultimate HIMYM fan. Ted would be proud! ☂️"
+];
+
+const LABELS = ['A','B','C','D'];
+
+const DIFFICULTIES = {
+  easy:   { label: 'Easy',   secs: 30, color: '#5dbb7a' },
+  medium: { label: 'Medium', secs: 20, color: '#f5c842' },
+  hard:   { label: 'Hard',   secs: 10, color: '#e74c3c' }
+};
+
+/* ─────────────────────────────────────────
+   BARNEY VOICE — ElevenLabs AI TTS
+   ─────────────────────────────────────────
+   HOW TO GET BARNEY'S REAL VOICE:
+   1. Sign up free at elevenlabs.io
+   2. Paste your API key into ELEVENLABS_KEY below
+   3. Go to elevenlabs.io/voice-library
+      → search "Barney Stinson" or "Neil Patrick Harris"
+      → click the voice → copy its Voice ID
+      → paste it into BARNEY_VOICE_ID below
+   4. Reload the page — done!
+   (Falls back to browser TTS if key is empty.)
+───────────────────────────────────────── */
+const ELEVENLABS_KEY  = '';                       // ← paste your key here
+const BARNEY_VOICE_ID = 'ErXwobaYiN019PkySvjV';  // default: Antoni (confident US male)
+
+const BARNEY_CORRECT = [
+  "Legen... wait for it... dary! Legendary!",
+  "Challenge accepted, and totally crushed! You are so awesome!",
+  "Suit up! That is what I am talking about! Nailed it!"
+];
+
+const BARNEY_WRONG = [
+  "That is so not awesome. Come on!",
+  "Oh please. Even Marshall knows that one. Not cool.",
+  "Have you even met the gang? Not legendary at all."
+];
+
+const _audioCache = {};
+
+function speakBarney(isCorrect) {
+  const pool = isCorrect ? BARNEY_CORRECT : BARNEY_WRONG;
+  const text = pool[Math.floor(Math.random() * pool.length)];
+  ELEVENLABS_KEY ? _elevenSpeak(text, isCorrect) : _webSpeak(text, isCorrect);
+}
+
+async function _elevenSpeak(text, isCorrect) {
+  // Serve from cache so repeated answers don't re-call the API
+  if (_audioCache[text]) {
+    return new Audio(_audioCache[text]).play().catch(() => _webSpeak(text, isCorrect));
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${BARNEY_VOICE_ID}/stream`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'xi-api-key': ELEVENLABS_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text,
+          model_id: 'eleven_turbo_v2_5',
+          voice_settings: {
+            // Correct → unstable/dynamic = excited; Wrong → stable/controlled = flat
+            stability:         isCorrect ? 0.18 : 0.55,
+            similarity_boost:  0.88,
+            style:             isCorrect ? 0.90 : 0.25,
+            use_speaker_boost: true
+          }
+        })
+      }
+    );
+
+    if (!res.ok) throw new Error(`ElevenLabs ${res.status}: ${await res.text()}`);
+
+    const url = URL.createObjectURL(await res.blob());
+    _audioCache[text] = url;
+    new Audio(url).play();
+  } catch (err) {
+    console.warn('ElevenLabs TTS failed — using browser voice:', err.message);
+    _webSpeak(text, isCorrect);
+  }
+}
+
+function _webSpeak(text, isCorrect) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt  = new SpeechSynthesisUtterance(text);
+  utt.lang   = 'en-US';
+  utt.volume = 1;
+  utt.rate   = isCorrect ? 1.18 : 0.85;
+  utt.pitch  = isCorrect ? 1.30 : 0.72;
+  const voices = window.speechSynthesis.getVoices();
+  const voice  = ['Alex','Daniel','Tom','David','James','Ryan']
+    .reduce((f, n) => f || voices.find(v => v.name === n), null)
+    || voices.find(v => v.lang === 'en-US') || null;
+  if (voice) utt.voice = voice;
+  window.speechSynthesis.speak(utt);
+}
+
+// Pre-warm browser TTS
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  window.speechSynthesis.getVoices();
+}
+
+/* ─────────────────────────────────────────
+   SAFE localStorage HELPERS
+   (SecurityError is thrown in some sandboxed
+    environments and kills the whole script)
+───────────────────────────────────────── */
+function _lsGet(key) {
+  try { return localStorage.getItem(key); } catch(e) { return null; }
+}
+function _lsSet(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
+function _lsDel(key) {
+  try { localStorage.removeItem(key); } catch(e) {}
+}
+
+/* ─────────────────────────────────────────
+   STATE
+   answers[qi] = { selected, correct }
+───────────────────────────────────────── */
+let g       = {};   // { qi, score, diff, timeLeft }
+let answers = {};   // per-question saved answers
+let _timer  = null; // countdown interval handle
+
+function reset() {
+  g = { qi: 0, score: 0, diff: g.diff || 'easy', timeLeft: 0 };
+  answers = {};
+  stopTimer();
+}
+
+/* ─────────────────────────────────────────
+   DIFFICULTY
+───────────────────────────────────────── */
+function showDifficulty() {
+  stopTimer();
+  try { updateDiffBests(); } catch(e) {}
+  show('difficulty');
+}
+
+function updateDiffBests() {
+  ['easy', 'medium', 'hard'].forEach(diff => {
+    const hs = _lsGet(`himym_hs_${diff}`);
+    const el = document.getElementById(`diff-best-${diff}`);
+    if (!el) return;
+    el.textContent = hs !== null ? `🏆 Best: ${hs} / 5` : '';
+  });
+}
+
+function selectDifficulty(diff) {
+  g.diff = diff;
+  startGame();
+}
+
+/* ─────────────────────────────────────────
+   TIMER
+───────────────────────────────────────── */
+function startTimer() {
+  stopTimer();
+  const total = DIFFICULTIES[g.diff].secs;
+  g.timeLeft  = total;
+  _setTimerUI(total, total);
+
+  _timer = setInterval(() => {
+    g.timeLeft--;
+    _setTimerUI(g.timeLeft, total);
+    if (g.timeLeft <= 0) { stopTimer(); timeOut(); }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (_timer) { clearInterval(_timer); _timer = null; }
+}
+
+function _setTimerUI(left, total) {
+  const fill = document.getElementById('timer-fill');
+  const num  = document.getElementById('timer-num');
+  if (!fill || !num) return;
+  const pct = Math.max(0, (left / total) * 100);
+  const col = left > total * .5 ? '#5dbb7a'
+            : left > total * .25 ? '#f5c842'
+            : '#e74c3c';
+  fill.style.width      = pct + '%';
+  fill.style.background = col;
+  num.textContent       = left;
+  num.style.color       = col;
+}
+
+function timeOut() {
+  if (answers[g.qi] !== undefined) return;
+  const q = QUESTIONS[g.qi];
+  answers[g.qi] = { selected: -1, correct: false };
+  speakBarney(false);
+  document.querySelectorAll('.choice').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.a) btn.classList.add('correct');
+  });
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback err';
+  fb.innerHTML = `<strong>⏱ Time's up!</strong> The answer was <strong>${LABELS[q.a]}: ${q.opts[q.a]}.</strong> ${q.exp}`;
+  updateNav(true);
+}
+
+/* ─────────────────────────────────────────
+   SCREENS
+───────────────────────────────────────── */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() { stopTimer(); show('welcome'); }
+
+/* ─────────────────────────────────────────
+   GAME FLOW
+───────────────────────────────────────── */
+function startGame() {
+  reset();
+  document.getElementById('score-num').textContent = '0';
+  show('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q     = QUESTIONS[g.qi];
+  const total = QUESTIONS.length;
+
+  document.getElementById('q-label').textContent = `Question ${g.qi + 1} of ${total}`;
+  document.getElementById('prog-fill').style.width = (g.qi / total * 100) + '%';
+
+  // Animate question in
+  const qBox = document.querySelector('.q-box');
+  qBox.style.animation = 'none';
+  void qBox.offsetWidth;
+  qBox.style.animation = 'fadeUp .35s ease both';
+  document.getElementById('q-text').textContent = q.q;
+
+  // Build choice buttons
+  const grid = document.getElementById('choices');
+  grid.style.animation = 'none';
+  void grid.offsetWidth;
+  grid.style.animation = 'fadeUp .4s .05s ease both';
+  grid.innerHTML = q.opts.map((opt, i) => `
+    <button class="choice" onclick="pick(${i})">
+      <span class="lbl">${LABELS[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  // Clear feedback
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  // Restore previous answer if question was already answered
+  if (answers[g.qi] !== undefined) {
+    stopTimer();
+    restoreAnswer(answers[g.qi]);
+  } else {
+    updateNav(false);
+    startTimer();
+  }
+}
+
+function restoreAnswer(ans) {
+  const q = QUESTIONS[g.qi];
+
+  // Re-colour buttons to show saved answer
+  document.querySelectorAll('.choice').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.a)            btn.classList.add('correct');
+    else if (i === ans.selected) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const fb = document.getElementById('feedback');
+  if (ans.correct) {
+    fb.className = 'feedback ok';
+    fb.innerHTML = `<strong>✓ Correct!</strong> ${q.exp}`;
+  } else {
+    fb.className = 'feedback err';
+    fb.innerHTML = `<strong>✗ Not quite.</strong> The answer was <strong>${LABELS[q.a]}: ${q.opts[q.a]}.</strong> ${q.exp}`;
+  }
+
+  updateNav(true);
+}
+
+function pick(idx) {
+  if (answers[g.qi] !== undefined) return; // already answered
+  stopTimer();
+
+  const q       = QUESTIONS[g.qi];
+  const correct = idx === q.a;
+
+  // Save answer
+  answers[g.qi] = { selected: idx, correct };
+
+  // Barney reacts
+  speakBarney(correct);
+
+  // Update score
+  if (correct) {
+    g.score++;
+    const num = document.getElementById('score-num');
+    num.textContent = g.score;
+    num.classList.remove('score-bump');
+    void num.offsetWidth;
+    num.classList.add('score-bump');
+  }
+
+  // Colour buttons
+  document.querySelectorAll('.choice').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.a)       btn.classList.add('correct');
+    else if (i === idx)  btn.classList.add('wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  if (correct) {
+    fb.className = 'feedback ok';
+    fb.innerHTML = `<strong>✓ Correct!</strong> ${q.exp}`;
+  } else {
+    fb.className = 'feedback err';
+    fb.innerHTML = `<strong>✗ Not quite.</strong> The answer was <strong>${LABELS[q.a]}: ${q.opts[q.a]}.</strong> ${q.exp}`;
+  }
+
+  updateNav(true);
+}
+
+/* ─────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────── */
+function updateNav(answered) {
+  const backBtn = document.getElementById('back-btn');
+  const fwdBtn  = document.getElementById('fwd-btn');
+  const isFirst = g.qi === 0;
+  const isLast  = g.qi === QUESTIONS.length - 1;
+
+  backBtn.textContent = isFirst ? '⌂ Welcome' : '← Back';
+
+  fwdBtn.disabled = !answered;
+  if (isLast) {
+    fwdBtn.textContent = answered ? '🍺 See Results' : 'Next →';
+  } else {
+    fwdBtn.textContent = 'Next →';
+  }
+}
+
+function goBack() {
+  stopTimer();
+  if (g.qi === 0) { goHome(); return; }
+  g.qi--;
+  renderQuestion();
+}
+
+function goForward() {
+  if (answers[g.qi] === undefined) return;
+  stopTimer();
+  if (g.qi === QUESTIONS.length - 1) { showResults(); return; }
+  g.qi++;
+  renderQuestion();
+}
+
+/* ─────────────────────────────────────────
+   RESULTS
+───────────────────────────────────────── */
+/* ─────────────────────────────────────────
+   SCORE PERSISTENCE (localStorage)
+───────────────────────────────────────── */
+function saveScore(s) {
+  const total  = QUESTIONS.length;
+  const diff   = g.diff || 'easy';
+  const hsKey  = `himym_hs_${diff}`;
+  const prev   = parseInt(_lsGet(hsKey) || '-1', 10);
+  const isNew  = s > prev;
+  const history = JSON.parse(_lsGet('himym_scores') || '[]');
+  const d      = new Date();
+  const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  history.unshift({ score: s, total, date: dateStr, diff });
+  if (history.length > 10) history.length = 10;
+  _lsSet('himym_scores', JSON.stringify(history));
+  if (isNew) _lsSet(hsKey, String(s));
+  return isNew;
+}
+
+function buildScoreboard(currentScore, isNewRecord) {
+  const history = JSON.parse(_lsGet('himym_scores') || '[]');
+  const diff    = g.diff || 'easy';
+  const hs      = _lsGet(`himym_hs_${diff}`) || '0';
+  const total   = QUESTIONS.length;
+  const el      = document.getElementById('r-scoreboard');
+  if (!history.length) { el.innerHTML = ''; return; }
+
+  const medals = ['🥇','🥈','🥉'];
+  const rows   = history.map((h, i) => {
+    const pct    = Math.round((h.score / h.total) * 100);
+    const medal  = medals[i] !== undefined ? medals[i] : (i + 1) + '.';
+    const dKey   = h.diff || 'easy';
+    const dLabel = (DIFFICULTIES[dKey] && DIFFICULTIES[dKey].label) || dKey;
+    return `
+      <div class="sb-row${i === 0 ? ' sb-current' : ''}">
+        <span class="sb-rank">${medal}</span>
+        <div class="sb-bar"><div class="sb-bar-fill" data-pct="${pct}"></div></div>
+        <span class="sb-pts">${h.score}/${h.total}</span>
+        <span class="sb-date"><span class="diff-badge ${dKey}">${dLabel}</span>${h.date}</span>
+      </div>`;
+  }).join('');
+
+  const diffLabel = (DIFFICULTIES[diff] && DIFFICULTIES[diff].label) || diff;
+
+  el.innerHTML = `
+    <div class="scoreboard-wrap">
+      ${isNewRecord ? '<div class="new-record-banner">🏆 New High Score!</div>' : ''}
+      <div class="scoreboard">
+        <div class="sb-header">
+          <span class="sb-title">
+            📊 Scoreboard
+            <span class="sb-best">🏆 ${diffLabel}: ${hs}/${total}</span>
+          </span>
+          <button class="sb-clear" onclick="clearScores()">Clear history</button>
+        </div>
+        ${rows}
+      </div>
+    </div>`;
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelectorAll('.sb-bar-fill').forEach(b => { b.style.width = b.dataset.pct + '%'; });
+  }));
+}
+
+function clearScores() {
+  if (!confirm('Clear all score history?')) return;
+  _lsDel('himym_scores');
+  ['easy','medium','hard'].forEach(d => _lsDel(`himym_hs_${d}`));
+  _lsDel('himym_highscore');
+  document.getElementById('r-scoreboard').innerHTML = '';
+}
+
+function showResults() {
+  document.getElementById('prog-fill').style.width = '100%';
+
+  const s     = g.score;
+  const total = QUESTIONS.length;
+
+  document.getElementById('r-emoji').textContent = EMOJIS[s];
+  document.getElementById('r-score').textContent = s;
+  document.getElementById('r-msg').textContent   = MSGS[s];
+
+  // Stars with staggered reveal
+  const starsEl = document.getElementById('r-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const sp = document.createElement('span');
+    sp.className   = 'star';
+    sp.textContent = '⭐';
+    if (i >= s) sp.style.filter = 'grayscale(1)';
+    starsEl.appendChild(sp);
+  }
+  Array.from(starsEl.children).slice(0, s).forEach((star, i) => {
+    star.style.opacity = '0';
+    setTimeout(() => {
+      star.style.transition = 'opacity .35s ease, transform .35s ease';
+      star.style.opacity    = '1';
+      star.style.transform  = 'scale(1.25)';
+      setTimeout(() => { star.style.transform = 'scale(1)'; }, 350);
+    }, 160 + i * 170);
+  });
+
+  // Breakdown (in question order)
+  const bd = document.getElementById('r-breakdown');
+  bd.innerHTML = QUESTIONS.map((q, i) => {
+    const h     = answers[i];
+    if (!h) return '';
+    const short = q.q.length > 60 ? q.q.slice(0, 60) + '…' : q.q;
+    return `<div class="brow">
+      <span class="bq">${i+1}. ${short}</span>
+      <span class="br ${h.correct ? 'ok' : 'no'}">${h.correct ? '✓' : '✗'}</span>
+    </div>`;
+  }).join('');
+
+  const isNew = saveScore(s);
+  buildScoreboard(s, isNew);
+
+  show('results');
+}
+
+/* ─────────────────────────────────────────
+   THEME TOGGLE
+───────────────────────────────────────── */
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  var btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+  _lsSet('himym_theme', theme);
+}
+
+function toggleTheme() {
+  applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+}
+
+// Restore saved preference (default: dark)
+applyTheme(localStorage.getItem('himym_theme') || 'dark');
+
+/* ─────────────────────────────────────────
+   FAIRY LIGHTS
+───────────────────────────────────────── */
+(function buildLights() {
+  const el     = document.getElementById('lights');
+  const colors = ['#ffc844','#ff8c33','#4fb3ff','#ff6eb4','#7aff7a'];
+  const count  = Math.max(20, Math.floor(window.innerWidth / 26));
+  for (let i = 0; i < count; i++) {
+    const l = document.createElement('span');
+    l.className = 'light';
+    const c = colors[i % colors.length];
+    l.style.cssText = `background:${c};box-shadow:0 0 5px ${c},0 0 10px ${c}`;
+    l.style.setProperty('--d',  (1.5 + (i * 137.5 % 1.5)).toFixed(2) + 's');
+    l.style.setProperty('--dl', (i * 137.5 % 2).toFixed(2) + 's');
+    el.appendChild(l);
+  }
+})();
+</script>
+</body>
+</html>

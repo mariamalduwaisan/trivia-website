@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>How I Met Your Mother — Trivia Challenge</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:        #07030a;
+  --burg:      #4a0e1c;
+  --burg-mid:  #6b1a28;
+  --wood:      #1c0a02;
+  --wood-mid:  #2e1205;
+  --amber:     #b87025;
+  --amber-lt:  #e09830;
+  --gold:      #f0c040;
+  --sofa:      #c04a16;
+  --sofa-lt:   #d86025;
+  --cream:     #f0e0b8;
+  --text:      #e0c898;
+  --muted:     #806848;
+  --ok:        #28a058;
+  --err:       #a82828;
+}
+
+html,body{height:100%}
+
+body{
+  font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:1rem;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* Pub atmosphere */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 90% 40% at 50% 0%,rgba(160,80,15,.22) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 35% at 10% 50%,rgba(90,20,8,.2) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 35% at 90% 50%,rgba(90,20,8,.2) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,rgba(50,10,4,.4) 0%,transparent 70%),
+    linear-gradient(170deg,#0c0503 0%,#130704 35%,#0a0502 65%,#070304 100%);
+  z-index:-2;pointer-events:none;
+}
+/* Wood grain lines */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:repeating-linear-gradient(90deg,transparent 0,transparent 20px,rgba(0,0,0,.04) 20px,rgba(0,0,0,.04) 22px);
+  z-index:-1;pointer-events:none;
+}
+
+/* ─── FAIRY LIGHTS ─── */
+#lights{position:fixed;top:0;left:0;right:0;height:16px;display:flex;align-items:center;gap:20px;padding:0 10px;z-index:200}
+.lt{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:ltg var(--d,2s) ease-in-out infinite var(--dl,0s)}
+@keyframes ltg{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.2)}}
+
+/* ─── APP WRAPPER ─── */
+#app{width:100%;max-width:640px;margin-top:22px}
+
+/* ─── SCREENS ─── */
+.screen{display:none;animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── CARD ─── */
+.card{
+  background:linear-gradient(158deg,#200e04 0%,#180a02 55%,#130801 100%);
+  border:1px solid rgba(184,112,37,.28);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),0 16px 60px rgba(0,0,0,.85),0 0 90px rgba(160,80,15,.12),inset 0 1px 0 rgba(240,180,70,.07);
+}
+.card-top{
+  height:8px;
+  background:repeating-linear-gradient(90deg,#6a2e0e 0,#8a4518 10px,#6a2e0e 20px,#9a5228 28px,#7a3c18 36px,#6a2e0e 44px);
+}
+
+/* ─── BUTTONS ─── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.88rem 2rem;border:none;border-radius:12px;
+  font-family:inherit;font-size:1rem;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  width:100%;max-width:340px;letter-spacing:.03em;
+}
+.btn-gold{
+  background:linear-gradient(135deg,#9a5610 0%,#c07820 55%,#e09830 100%);
+  color:#080300;font-weight:bold;
+  box-shadow:0 4px 20px rgba(180,110,30,.5),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(180,110,30,.6),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-gold:active{transform:translateY(0)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid rgba(184,112,37,.28)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-1px)}
+
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(184,112,37,.32),transparent)}
+
+/* ════════════════════════════════════
+   WELCOME SCREEN
+════════════════════════════════════ */
+.w-inner{padding:0 0 2.2rem;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center}
+
+/* ── PUB HERO (top of welcome) ── */
+.pub-hero{
+  width:100%;height:230px;
+  background:linear-gradient(180deg,#080302 0%,#120602 45%,#1a0904 100%);
+  position:relative;overflow:hidden;
+  border-bottom:1px solid rgba(184,112,37,.18);
+}
+/* Overhead warm glow */
+.ph-glow{
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:300px;height:120px;
+  background:radial-gradient(ellipse,rgba(180,100,20,.35) 0%,transparent 70%);
+}
+/* Back wall with burgundy */
+.ph-wall{
+  position:absolute;top:0;left:0;right:0;bottom:50px;
+  background:linear-gradient(180deg,var(--burg) 0%,#380c18 60%,#200608 100%);
+}
+/* Wood wainscoting */
+.ph-wainscot{
+  position:absolute;bottom:50px;left:0;right:0;height:30px;
+  background:linear-gradient(180deg,#3a1808,#280e04);
+  border-top:2px solid #6a3010;
+}
+/* Floor */
+.ph-floor{
+  position:absolute;bottom:0;left:0;right:0;height:52px;
+  background:linear-gradient(180deg,#1e0a03,#150703);
+  border-top:2px solid #4a2008;
+}
+/* Pendant lights hanging from ceiling */
+.ph-pendants{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-around;padding:0 30px}
+.pendant{display:flex;flex-direction:column;align-items:center}
+.pend-cord{width:2px;height:30px;background:#222}
+.pend-bulb{
+  width:18px;height:22px;
+  background:radial-gradient(ellipse at 40% 35%,#ffe89a,#f0b030 40%,#c07820 100%);
+  border-radius:50% 50% 45% 45%;
+  box-shadow:0 0 12px rgba(240,176,48,.8),0 0 24px rgba(240,176,48,.4);
+  animation:bulbFlicker 5s ease-in-out infinite;
+}
+.pend-shade{
+  width:28px;height:14px;
+  background:linear-gradient(180deg,#2a1006,#1a0804);
+  border-radius:3px 3px 10px 10px;
+  border:1px solid #4a2010;
+  margin-top:-8px;
+}
+@keyframes bulbFlicker{0%,88%,92%,100%{opacity:1}89%,91%{opacity:.7}90%{opacity:.85}}
+
+/* MacLaren's neon sign */
+.ph-sign{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  font-family:Georgia,serif;font-size:1.1rem;font-weight:bold;
+  color:#f0c040;letter-spacing:.18em;white-space:nowrap;
+  text-shadow:0 0 8px #f0c040,0 0 16px #f0c040,0 0 30px rgba(240,192,64,.5);
+  border:1px solid rgba(240,192,64,.3);border-radius:4px;padding:4px 14px;
+  animation:neonFlick 4s ease-in-out infinite;
+}
+@keyframes neonFlick{0%,90%,94%,100%{opacity:1;text-shadow:0 0 8px #f0c040,0 0 16px #f0c040,0 0 30px rgba(240,192,64,.5)}91%,93%{opacity:.5;text-shadow:none}92%{opacity:.8}}
+
+/* OPEN sign */
+.ph-open{
+  position:absolute;top:18px;right:22px;
+  font-family:'Courier New',monospace;font-size:.72rem;font-weight:bold;
+  letter-spacing:.12em;color:#60f090;
+  text-shadow:0 0 6px #60f090,0 0 12px #60f090;
+  border:1px solid rgba(96,240,144,.35);border-radius:3px;padding:2px 7px;
+}
+/* Dartboard */
+.ph-dart{
+  position:absolute;top:16px;left:22px;
+  width:38px;height:38px;border-radius:50%;
+  background:radial-gradient(circle,#eee 0 4px,#c0392b 4px 8px,#fff 8px 12px,#c0392b 12px 16px,#111 16px 19px);
+  border:2px solid #4a2010;
+  box-shadow:0 0 6px rgba(0,0,0,.5);
+}
+/* Shelf of bottles on back wall */
+.ph-shelf{
+  position:absolute;top:62px;left:0;right:0;
+  display:flex;justify-content:center;gap:5px;align-items:flex-end;
+}
+.ph-bottle{border-radius:3px 3px 0 0;box-shadow:1px 0 3px rgba(0,0,0,.4)}
+/* Beer taps on bar */
+.ph-taps{
+  position:absolute;bottom:52px;left:50%;transform:translateX(-50%);
+  display:flex;gap:26px;
+}
+.tap-unit{display:flex;flex-direction:column;align-items:center}
+.tap-h{width:16px;height:9px;background:linear-gradient(#d0d0d0,#999);border-radius:3px 3px 0 0}
+.tap-p{width:5px;height:26px;background:linear-gradient(#bbb,#777)}
+.tap-b{width:22px;height:5px;background:#555;border-radius:2px}
+
+/* ── THE ORANGE SOFA ── */
+.sofa-wrap{
+  position:absolute;
+  bottom:60px;left:50%;transform:translateX(-50%);
+  width:260px;height:100px;
+}
+/* Shadow under sofa */
+.sofa-wrap::after{
+  content:'';position:absolute;
+  bottom:-6px;left:20px;right:20px;height:8px;
+  background:radial-gradient(ellipse,rgba(0,0,0,.55) 0%,transparent 70%);
+  border-radius:50%;
+}
+/* Back rest */
+.sf-back{
+  position:absolute;top:0;left:25px;right:25px;height:50px;
+  background:linear-gradient(155deg,#d06025 0%,#b84418 60%,#a03a10 100%);
+  border-radius:14px 14px 0 0;
+  box-shadow:inset 0 2px 0 rgba(255,180,80,.2),0 -2px 8px rgba(200,70,20,.3);
+}
+/* Back rest highlight stripe */
+.sf-back::before{
+  content:'';position:absolute;
+  top:6px;left:12px;right:12px;height:5px;
+  background:linear-gradient(90deg,transparent,rgba(255,200,100,.15),transparent);
+  border-radius:3px;
+}
+/* Arms */
+.sf-arm-l,.sf-arm-r{
+  position:absolute;top:26px;width:28px;height:52px;
+  background:linear-gradient(165deg,#c85020,#a03c10);
+  box-shadow:inset 0 1px 0 rgba(255,180,80,.15);
+}
+.sf-arm-l{left:0;border-radius:10px 5px 5px 10px}
+.sf-arm-r{right:0;border-radius:5px 10px 10px 5px}
+/* Seat */
+.sf-seat{
+  position:absolute;top:40px;left:16px;right:16px;height:40px;
+  background:linear-gradient(180deg,#c04818 0%,#9c3810 100%);
+  border-radius:3px 3px 8px 8px;
+  box-shadow:inset 0 -3px 10px rgba(0,0,0,.3);
+}
+/* Cushions */
+.sf-cushions{
+  position:absolute;top:43px;left:24px;right:24px;height:26px;
+  display:flex;gap:5px;z-index:2;
+}
+.sf-cush{
+  flex:1;
+  background:linear-gradient(180deg,#c85020 0%,#a83e12 100%);
+  border-radius:4px 4px 3px 3px;
+  border-top:1px solid rgba(255,180,80,.22);
+  box-shadow:inset 0 1px 0 rgba(255,180,80,.12);
+}
+/* Legs */
+.sf-legs{
+  position:absolute;bottom:0;left:28px;right:28px;
+  display:flex;justify-content:space-between;
+}
+.sf-leg{width:9px;height:16px;background:linear-gradient(180deg,#4a2008,#2d1205);border-radius:0 0 3px 3px}
+/* People silhouettes */
+.sf-people{
+  position:absolute;top:2px;left:34px;right:34px;height:42px;
+  display:flex;justify-content:space-around;align-items:flex-end;
+  z-index:4;
+}
+.sil{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sil-h{width:13px;height:13px;border-radius:50%}
+.sil-b{width:17px;height:22px;border-radius:5px 5px 0 0}
+/* Coffee table */
+.sf-table{
+  position:absolute;bottom:62px;left:50%;transform:translateX(-50%);
+  width:100px;height:9px;
+  background:linear-gradient(180deg,#4a2010,#2d1205);
+  border-radius:5px;z-index:5;
+  box-shadow:0 3px 8px rgba(0,0,0,.45);
+}
+.sf-table::before{content:'🍺 🍺';position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:.85rem;white-space:nowrap}
+
+/* Welcome body text */
+.w-badge{
+  display:inline-block;font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;
+  color:var(--amber-lt);background:rgba(184,112,37,.14);
+  border:1px solid rgba(184,112,37,.3);border-radius:99px;padding:.3rem 1rem;
+  font-family:system-ui,sans-serif;margin:1.6rem 0 .8rem;
+}
+.w-title h1{
+  font-size:clamp(1.2rem,4.5vw,2rem);color:var(--gold);
+  text-shadow:0 0 28px rgba(240,192,64,.4);letter-spacing:.04em;line-height:1.3;
+}
+.w-title .sub{font-size:.9rem;color:var(--muted);margin-top:.4rem;font-style:italic}
+
+.w-tagline{
+  font-size:.9rem;color:var(--muted);font-style:italic;line-height:1.75;
+  padding:0 1rem;
+}
+.w-tagline strong{color:var(--amber-lt);font-style:normal}
+
+.w-chips{display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin:.2rem 0}
+.chip{
+  display:flex;align-items:center;gap:.38rem;font-size:.78rem;
+  color:var(--muted);font-family:system-ui,sans-serif;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:99px;padding:.28rem .8rem;
+}
+.w-actions{padding:0 1.5rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;width:100%;margin-top:.4rem}
+
+/* ════════════════════════════════════
+   QUIZ SCREEN
+════════════════════════════════════ */
+.qz-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.4rem .75rem;gap:.9rem;
+}
+.q-lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-family:system-ui,sans-serif;white-space:nowrap}
+.prog-track{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,#8a4a08,#d07820,#f0c040);
+  border-radius:3px;
+  transition:width .55s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px rgba(240,192,64,.55);
+}
+.score-pill{
+  display:flex;align-items:center;gap:.35rem;
+  background:rgba(184,112,37,.12);border:1px solid rgba(184,112,37,.28);
+  border-radius:99px;padding:.26rem .8rem;
+  font-size:.8rem;font-family:system-ui,sans-serif;color:var(--gold);white-space:nowrap;
+}
+#score-val{font-weight:700;display:inline-block}
+@keyframes scorePop{0%{transform:scale(1);color:var(--gold)}40%{transform:scale(1.55);color:#50ffa0}100%{transform:scale(1);color:var(--gold)}}
+.score-pop{animation:scorePop .45s ease both}
+
+/* ── VISUAL CARD ── */
+.q-visual{width:100%;height:175px;position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.05)}
+
+/* Visual: pub */
+.vis-pub{
+  width:100%;height:100%;
+  background:linear-gradient(180deg,#060200 0%,#100603 45%,#1a0904 100%);
+  position:relative;overflow:hidden;
+}
+.vp-wall{position:absolute;top:0;left:0;right:0;bottom:55px;background:linear-gradient(180deg,#3a0c14,#260808)}
+.vp-glow{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:220px;height:100px;background:radial-gradient(ellipse,rgba(180,100,20,.35) 0%,transparent 70%)}
+.vp-sign{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:Georgia,serif;font-size:1rem;font-weight:bold;color:var(--gold);text-shadow:0 0 8px var(--gold),0 0 18px var(--gold),0 0 32px rgba(240,192,64,.4);letter-spacing:.18em;white-space:nowrap;animation:neonFlick 4s ease-in-out infinite}
+.vp-floor{position:absolute;bottom:0;left:0;right:0;height:57px;background:linear-gradient(180deg,#1e0a03,#150702);border-top:2px solid #4a2008}
+.vp-counter{position:absolute;bottom:0;left:0;right:0;height:57px;background:linear-gradient(180deg,#2a1005,#180702);border-top:3px solid #7a3a12}
+.vp-bottles{position:absolute;bottom:58px;left:18px;display:flex;gap:5px;align-items:flex-end}
+.vp-bot{border-radius:2px 2px 0 0;box-shadow:1px 0 3px rgba(0,0,0,.5)}
+.vp-beers{position:absolute;bottom:62px;right:25px;font-size:1.5rem}
+.vp-taps{position:absolute;bottom:55px;left:50%;transform:translateX(-50%);display:flex;gap:22px}
+.vp-tap{display:flex;flex-direction:column;align-items:center}
+
+/* Visual: suit */
+.vis-suit{
+  width:100%;height:100%;
+  background:linear-gradient(158deg,#08091a 0%,#10142a 55%,#0c1022 100%);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.vs-glow{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:200px;height:130px;background:radial-gradient(ellipse,rgba(40,55,130,.32) 0%,transparent 70%)}
+.vs-spk{position:absolute;color:var(--gold);font-size:.8rem;animation:spkAnim var(--sd,2s) ease-in-out infinite var(--sdl,0s)}
+@keyframes spkAnim{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.1)}}
+.vs-label{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:.82rem;font-weight:bold;letter-spacing:.22em;color:var(--gold);text-shadow:0 0 10px rgba(240,192,64,.5);font-family:system-ui,sans-serif;white-space:nowrap}
+
+/* Visual: horn */
+.vis-horn{
+  width:100%;height:100%;
+  background:linear-gradient(158deg,#04060e 0%,#080c1a 55%,#060a18 100%);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.vh-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:radial-gradient(ellipse,rgba(20,80,160,.28) 0%,transparent 65%)}
+.vh-candle{position:absolute;bottom:18px;display:flex;flex-direction:column;align-items:center}
+.vh-flame{width:8px;height:15px;background:radial-gradient(ellipse,#fff 0%,#ffd700 40%,#ff8c00 75%,transparent 100%);border-radius:50% 50% 30% 30%;animation:flameDance 1.5s ease-in-out infinite alternate;margin-bottom:-2px}
+@keyframes flameDance{from{transform:scaleX(1) rotate(-3deg)}to{transform:scaleX(.8) rotate(3deg)}}
+.vh-wax{width:12px;height:34px;background:linear-gradient(180deg,#f5f5f0,#e0e0d8);border-radius:2px;box-shadow:0 0 8px rgba(255,200,100,.25)}
+.vh-base{width:18px;height:5px;background:#c8c8c0;border-radius:2px}
+.vh-center{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px}
+.vh-horn{font-size:4.5rem;text-shadow:0 0 20px rgba(40,100,220,.7),0 0 40px rgba(20,60,180,.4);animation:hornPulse 3s ease-in-out infinite;filter:hue-rotate(185deg) saturate(1.8) brightness(.85)}
+@keyframes hornPulse{0%,100%{text-shadow:0 0 20px rgba(40,100,220,.7),0 0 40px rgba(20,60,180,.4)}50%{text-shadow:0 0 30px rgba(60,140,255,1),0 0 60px rgba(30,80,220,.6)}}
+.vh-note{position:absolute;font-size:1rem;color:rgba(80,140,240,.75);animation:noteRise var(--nd,2.5s) ease-in-out infinite var(--ndl,0s)}
+@keyframes noteRise{from{transform:translateY(0) scale(.8);opacity:.6}to{transform:translateY(-35px) scale(1.1);opacity:0}}
+.vh-label{font-size:.8rem;color:rgba(90,150,240,.8);letter-spacing:.16em;text-transform:uppercase;font-family:system-ui,sans-serif}
+
+/* Visual: law */
+.vis-law{
+  width:100%;height:100%;
+  background:linear-gradient(158deg,#040a04 0%,#081208 55%,#061008 100%);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.vl-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:radial-gradient(ellipse,rgba(30,100,30,.25) 0%,transparent 70%)}
+.vl-books{position:absolute;bottom:0;display:flex;gap:3px;align-items:flex-end;padding:0 14px}
+.vl-book{border-radius:2px 2px 0 0;border-top:2px solid rgba(255,255,255,.1)}
+.vl-center{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px}
+.vl-scales{font-size:4rem;filter:drop-shadow(0 0 12px rgba(190,170,50,.5));animation:scalesSway 4s ease-in-out infinite}
+@keyframes scalesSway{0%,100%{transform:rotate(0)}25%{transform:rotate(2deg)}75%{transform:rotate(-2deg)}}
+.vl-label{font-size:.88rem;font-weight:bold;color:rgba(200,180,55,.8);letter-spacing:.2em;text-transform:uppercase;font-family:system-ui,sans-serif;text-shadow:0 0 10px rgba(200,180,55,.3)}
+.vl-sub{font-size:.7rem;color:rgba(110,170,80,.6);letter-spacing:.1em;font-family:system-ui,sans-serif;margin-top:2px}
+
+/* Visual: playbook */
+.vis-pb{
+  width:100%;height:100%;
+  background:linear-gradient(158deg,#07040e 0%,#0e0820 55%,#090618 100%);
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.vpb-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;background:radial-gradient(ellipse,rgba(90,30,150,.32) 0%,transparent 70%)}
+.vpb-star{position:absolute;color:var(--gold);animation:starTwink var(--sd,2s) ease-in-out infinite var(--sdl,0s)}
+@keyframes starTwink{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
+.bk-wrap{position:relative;z-index:2;display:flex;align-items:flex-start}
+.bk-spine{width:18px;height:115px;background:linear-gradient(180deg,#4a1878,#2a0d50);border-radius:4px 0 0 4px;box-shadow:inset 2px 0 4px rgba(255,255,255,.1),-2px 0 8px rgba(0,0,0,.4)}
+.bk-cover{
+  width:82px;height:115px;
+  background:linear-gradient(158deg,#5c1f90,#3a1268);
+  border-radius:0 4px 4px 0;position:relative;
+  box-shadow:4px 4px 16px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08);overflow:hidden;
+}
+.bk-cover::before{content:'';position:absolute;top:6px;left:6px;right:6px;bottom:6px;border:1px solid rgba(240,192,64,.3);border-radius:2px}
+.bk-cover::after{content:'';position:absolute;top:10px;left:10px;right:10px;bottom:10px;border:1px solid rgba(240,192,64,.14);border-radius:2px}
+.bk-title{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;text-align:center;font-size:.6rem;font-weight:bold;letter-spacing:.1em;color:var(--gold);text-shadow:0 0 8px rgba(240,192,64,.4);font-family:Georgia,serif;line-height:1.45}
+.bk-pages{width:6px;height:109px;margin-top:3px;background:repeating-linear-gradient(180deg,#f5f0e8 0,#f5f0e8 2px,#e8e0d0 2px,#e8e0d0 3px);border-radius:0 2px 2px 0;box-shadow:2px 0 4px rgba(0,0,0,.3)}
+.vpb-label{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:.72rem;color:rgba(175,125,240,.8);letter-spacing:.14em;text-transform:uppercase;font-family:system-ui,sans-serif;white-space:nowrap}
+
+/* ── QUESTION BODY ── */
+.q-body{padding:1.2rem 1.5rem .9rem}
+.q-text{font-size:clamp(.95rem,2.5vw,1.15rem);color:var(--cream);line-height:1.65;text-align:center}
+
+/* ── CHOICES ── */
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;padding:0 1.2rem 1rem}
+.choice-btn{
+  display:flex;align-items:flex-start;gap:.65rem;
+  padding:.8rem .9rem;
+  background:rgba(255,255,255,.038);border:1.5px solid rgba(255,255,255,.09);
+  border-radius:11px;color:var(--text);font-size:.87rem;font-family:inherit;
+  cursor:pointer;text-align:left;line-height:1.45;
+  transition:background .18s,border-color .18s,transform .14s;
+}
+.choice-btn:hover:not(:disabled){background:rgba(184,112,37,.1);border-color:rgba(184,112,37,.38);transform:translateY(-1px)}
+.choice-btn:disabled{cursor:default}
+.ch-lbl{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:26px;height:26px;border-radius:6px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);
+  font-size:.72rem;font-weight:700;font-family:system-ui,sans-serif;flex-shrink:0;margin-top:1px;
+  transition:background .18s,border-color .18s;
+}
+.choice-btn.correct{background:rgba(40,160,88,.14);border-color:var(--ok);color:#90ffb8}
+.choice-btn.correct .ch-lbl{background:var(--ok);border-color:var(--ok);color:#fff}
+.choice-btn.wrong{background:rgba(168,40,40,.14);border-color:var(--err);color:#ffaaaa}
+.choice-btn.wrong .ch-lbl{background:var(--err);border-color:var(--err);color:#fff}
+
+/* ── FEEDBACK ── */
+.feedback{
+  margin:0 1.2rem;padding:.88rem 1.1rem;border-radius:10px;
+  font-size:.875rem;line-height:1.55;display:none;
+  animation:fadeUp .3s ease both;
+}
+.feedback.ok{display:block;background:rgba(40,160,88,.1);border:1px solid rgba(40,160,88,.28);color:#90ffb8}
+.feedback.err{display:block;background:rgba(168,40,40,.1);border:1px solid rgba(168,40,40,.28);color:#ffaaaa}
+
+/* ── NEXT BUTTON ── */
+.next-wrap{padding:.85rem 1.2rem 1.5rem;display:none;justify-content:center}
+.next-wrap.show{display:flex}
+
+/* ════════════════════════════════════
+   RESULTS SCREEN
+════════════════════════════════════ */
+.r-inner{padding:2.4rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.35rem}
+.r-emoji{font-size:4.5rem;display:block;animation:heroFloat 3s ease-in-out infinite}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.r-stars{display:flex;gap:.32rem;font-size:1.55rem}
+.star{opacity:.15}
+.star.on{opacity:1}
+.r-score{font-size:3.5rem;color:var(--gold);text-shadow:0 0 28px rgba(240,192,64,.45);line-height:1;display:block;text-align:center}
+.r-pct{font-size:.9rem;color:var(--muted);margin-top:.25rem;text-align:center}
+.r-msg{text-align:center;font-style:italic;font-size:1.05rem;color:var(--cream);line-height:1.65;max-width:400px}
+.r-breakdown{
+  width:100%;background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;
+}
+.brow{
+  display:flex;align-items:center;gap:.6rem;padding:.52rem 1rem;
+  font-size:.8rem;font-family:system-ui,sans-serif;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.brow:last-child{border-bottom:none}
+.brow-ico{font-size:1rem;flex-shrink:0}
+.brow-q{flex:1;color:var(--muted)}
+.brow-a{font-weight:700;flex-shrink:0}
+.brow-a.ok{color:var(--ok)}
+.brow-a.err{color:var(--err)}
+.r-btns{display:flex;flex-direction:column;align-items:center;gap:.65rem;width:100%}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  .choices-grid{grid-template-columns:1fr}
+  .r-inner,.w-inner{padding-left:1rem;padding-right:1rem}
+  .pub-hero{height:200px}
+  .sofa-wrap{width:220px}
+}
+</style>
+</head>
+<body>
+
+<div id="lights"></div>
+
+<div id="app">
+
+<!-- ═══ WELCOME ═══ -->
+<div id="welcome" class="screen active">
+<div class="card">
+<div class="card-top"></div>
+
+<!-- Pub Hero Visual -->
+<div class="pub-hero">
+  <div class="ph-wall"></div>
+  <div class="ph-glow"></div>
+  <div class="ph-sign">✦ MacLaren's Pub ✦</div>
+  <div class="ph-open">OPEN</div>
+  <div class="ph-dart"></div>
+
+  <!-- Pendants -->
+  <div class="ph-pendants">
+    <div class="pendant"><div class="pend-cord"></div><div class="pend-shade"></div><div class="pend-bulb"></div></div>
+    <div class="pendant"><div class="pend-cord"></div><div class="pend-shade"></div><div class="pend-bulb" style="animation-delay:.8s"></div></div>
+    <div class="pendant"><div class="pend-cord"></div><div class="pend-shade"></div><div class="pend-bulb" style="animation-delay:1.6s"></div></div>
+    <div class="pendant"><div class="pend-cord"></div><div class="pend-shade"></div><div class="pend-bulb" style="animation-delay:.4s"></div></div>
+    <div class="pendant"><div class="pend-cord"></div><div class="pend-shade"></div><div class="pend-bulb" style="animation-delay:1.2s"></div></div>
+  </div>
+
+  <!-- Back wall bottles -->
+  <div class="ph-shelf">
+    <div class="ph-bottle" style="width:9px;height:32px;background:linear-gradient(#2a7a28,#1a5a18)"></div>
+    <div class="ph-bottle" style="width:9px;height:42px;background:linear-gradient(#8b4513,#5b2008)"></div>
+    <div class="ph-bottle" style="width:9px;height:28px;background:linear-gradient(#3a5a8a,#2a4a7a)"></div>
+    <div class="ph-bottle" style="width:9px;height:40px;background:linear-gradient(#c07020,#905010)"></div>
+    <div class="ph-bottle" style="width:9px;height:25px;background:linear-gradient(#6a2a8a,#4a1a6a)"></div>
+    <div class="ph-bottle" style="width:9px;height:38px;background:linear-gradient(#a03020,#701808)"></div>
+    <div class="ph-bottle" style="width:9px;height:30px;background:linear-gradient(#4a8a4a,#2a6a2a)"></div>
+  </div>
+
+  <!-- Wainscoting -->
+  <div class="ph-wainscot"></div>
+  <!-- Floor / bar counter -->
+  <div class="ph-floor"></div>
+
+  <!-- Beer taps -->
+  <div class="ph-taps">
+    <div class="tap-unit"><div class="tap-h"></div><div class="tap-p"></div><div class="tap-b"></div></div>
+    <div class="tap-unit"><div class="tap-h"></div><div class="tap-p"></div><div class="tap-b"></div></div>
+    <div class="tap-unit"><div class="tap-h"></div><div class="tap-p"></div><div class="tap-b"></div></div>
+  </div>
+
+  <!-- THE ORANGE SOFA -->
+  <div class="sofa-wrap">
+    <div class="sf-back"></div>
+    <div class="sf-arm-l"></div>
+    <div class="sf-arm-r"></div>
+    <div class="sf-seat"></div>
+    <div class="sf-cushions">
+      <div class="sf-cush"></div>
+      <div class="sf-cush"></div>
+      <div class="sf-cush"></div>
+    </div>
+    <div class="sf-people">
+      <div class="sil"><div class="sil-h" style="background:rgba(100,40,80,.6)"></div><div class="sil-b" style="background:rgba(80,30,60,.5)"></div></div>
+      <div class="sil"><div class="sil-h" style="background:rgba(40,60,100,.6)"></div><div class="sil-b" style="background:rgba(30,50,90,.5)"></div></div>
+      <div class="sil"><div class="sil-h" style="background:rgba(80,50,20,.6)"></div><div class="sil-b" style="background:rgba(70,40,15,.5)"></div></div>
+      <div class="sil"><div class="sil-h" style="background:rgba(30,80,30,.6)"></div><div class="sil-b" style="background:rgba(20,70,20,.5)"></div></div>
+      <div class="sil"><div class="sil-h" style="background:rgba(100,30,30,.6)"></div><div class="sil-b" style="background:rgba(80,20,20,.5)"></div></div>
+    </div>
+    <div class="sf-legs"><div class="sf-leg"></div><div class="sf-leg"></div><div class="sf-leg"></div><div class="sf-leg"></div></div>
+    <div class="sf-table"></div>
+  </div>
+
+</div><!-- /pub-hero -->
+
+<div class="w-inner">
+  <div class="w-badge">Fan-Made Trivia Game</div>
+  <div class="w-title">
+    <h1>How I Met Your Mother<br>Trivia Challenge</h1>
+    <p class="sub">MacLaren's Pub Edition</p>
+  </div>
+  <div class="divider" style="margin:.2rem 1.5rem 0;width:auto"></div>
+  <p class="w-tagline">
+    Pull up a stool at <strong>MacLaren's</strong>.<br>
+    This is gonna be <strong>legen— wait for it —dary!</strong>
+  </p>
+  <div class="w-chips">
+    <div class="chip">🎯 5 Questions</div>
+    <div class="chip">🍺 4 Choices</div>
+    <div class="chip">☂️ ~3 min</div>
+  </div>
+  <div class="w-actions">
+    <button class="btn btn-gold" onclick="startGame()">🍺&nbsp; Start the Challenge</button>
+  </div>
+</div>
+
+</div>
+</div><!-- /welcome -->
+
+<!-- ═══ QUIZ ═══ -->
+<div id="quiz" class="screen">
+<div class="card">
+<div class="card-top"></div>
+<div class="quiz-header">
+  <span class="q-lbl" id="q-lbl">Q1 of 5</span>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="score-pill">🍺 <span id="score-val">0</span>/5</div>
+</div>
+<div class="q-visual" id="q-visual"></div>
+<div class="q-body"><p class="q-text" id="q-text"></p></div>
+<div class="choices-grid" id="choices-grid"></div>
+<div class="feedback" id="feedback"></div>
+<div class="next-wrap" id="next-wrap">
+  <button class="btn btn-gold" id="next-btn">Next Question →</button>
+</div>
+</div>
+</div><!-- /quiz -->
+
+<!-- ═══ RESULTS ═══ -->
+<div id="results" class="screen">
+<div class="card">
+<div class="card-top"></div>
+<div class="r-inner">
+  <span class="r-emoji" id="r-emoji">🏆</span>
+  <div class="r-stars" id="r-stars"></div>
+  <div><div class="r-score" id="r-score">0/5</div><div class="r-pct" id="r-pct">0% correct</div></div>
+  <p class="r-msg" id="r-msg"></p>
+  <div class="divider" style="width:100%"></div>
+  <div class="r-breakdown" id="r-breakdown"></div>
+  <div class="r-btns">
+    <button class="btn btn-gold" onclick="startGame()">🔄&nbsp; Play Again</button>
+    <button class="btn btn-ghost" onclick="goHome()">← Back to Start</button>
+  </div>
+</div>
+</div>
+</div><!-- /results -->
+
+</div><!-- /#app -->
+
+<script>
+/* ══════════════════════════════════════════
+   DATA
+══════════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    q: "What is the name of the bar where the gang spends most of their time?",
+    opts: ["Puzzles","MacLaren's Pub","The Goliath Lounge","Cheers"],
+    a: 1, visual: 'pub',
+    exp: "MacLaren's Pub is on the ground floor of the gang's apartment building in Manhattan — their legendary second home for all 9 seasons."
+  },
+  {
+    q: "What is Barney Stinson's famous catchphrase?",
+    opts: ["Challenge Accepted","Legendary","Suit Up","All of the Above"],
+    a: 3, visual: 'suit',
+    exp: "All of them! 'Challenge Accepted', 'Legendary', and 'Suit Up' are iconic Barney lines — so the correct answer is D: All of the Above."
+  },
+  {
+    q: "What instrument does Ted steal for Robin on their first date?",
+    opts: ["Guitar","Trumpet","French Horn","Violin"],
+    a: 2, visual: 'horn',
+    exp: "Ted steals the Blue French Horn from a restaurant after their first date. It becomes one of the most iconic symbols of his love for Robin throughout the series."
+  },
+  {
+    q: "What is Marshall Eriksen's profession throughout the series?",
+    opts: ["Doctor","Architect","Journalist","Lawyer"],
+    a: 3, visual: 'law',
+    exp: "Marshall is an environmental lawyer who dreams of becoming a judge — a dream he eventually fulfils, becoming a New York State Supreme Court Judge."
+  },
+  {
+    q: "What is the name of Barney's book of dating strategies?",
+    opts: ["The Rulebook","The Bro Code","The Playbook","The Manual"],
+    a: 2, visual: 'playbook',
+    exp: "The Playbook is Barney's legendary collection of ridiculous dating strategies — including The Naked Man, The Lorenzo Von Matterhorn, and The SCUBA Diver."
+  }
+];
+
+const LABELS = ['A','B','C','D'];
+
+const EMOJIS  = ['😢','😔','😕','🙂','🍺','🏆'];
+const MSGS = [
+  "Have you even met the gang?",
+  "Time for a rewatch at MacLaren's.",
+  "Time for a rewatch at MacLaren's.",
+  "Not bad, Schmosby.",
+  "Suit up! You're a true HIMYM fan.",
+  "Legendary! Barney would be proud."
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let state = { currentQuestion:0, score:0, selectedAnswer:null, gameFinished:false };
+let history = [];
+
+/* ══════════════════════════════════════════
+   SCREENS
+══════════════════════════════════════════ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome(){ show('welcome'); }
+
+/* ══════════════════════════════════════════
+   VISUAL BUILDERS
+══════════════════════════════════════════ */
+function buildVisual(type){
+  const el = document.getElementById('q-visual');
+
+  if(type==='pub'){
+    el.innerHTML=`
+      <div class="vis-pub">
+        <div class="vp-wall"></div>
+        <div class="vp-glow"></div>
+        <div class="vp-sign">✦ MacLaren's Pub ✦</div>
+        <div class="vp-floor"></div>
+        <div class="vp-counter"></div>
+        <div class="vp-bottles">
+          <div class="vp-bot" style="width:9px;height:30px;background:linear-gradient(#2a7a28,#1a5a18)"></div>
+          <div class="vp-bot" style="width:9px;height:42px;background:linear-gradient(#8b4513,#5b2008)"></div>
+          <div class="vp-bot" style="width:9px;height:26px;background:linear-gradient(#3a5a8a,#2a4a7a)"></div>
+          <div class="vp-bot" style="width:9px;height:38px;background:linear-gradient(#c07020,#905010)"></div>
+          <div class="vp-bot" style="width:9px;height:24px;background:linear-gradient(#6a2a8a,#4a1a6a)"></div>
+          <div class="vp-bot" style="width:9px;height:35px;background:linear-gradient(#a03020,#701808)"></div>
+        </div>
+        <div class="vp-beers">🍺 🍻</div>
+        <div class="vp-taps">
+          ${[0,1,2].map(()=>`<div class="vp-tap"><div style="width:15px;height:9px;background:linear-gradient(#d0d0d0,#999);border-radius:3px 3px 0 0"></div><div style="width:5px;height:26px;background:linear-gradient(#bbb,#777)"></div><div style="width:20px;height:5px;background:#555;border-radius:2px"></div></div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  else if(type==='suit'){
+    el.innerHTML=`
+      <div class="vis-suit">
+        <div class="vs-glow"></div>
+        <span class="vs-spk" style="top:18px;left:55px;--sd:2s;--sdl:0s">✦</span>
+        <span class="vs-spk" style="top:25px;right:50px;--sd:2.5s;--sdl:.7s">✦</span>
+        <span class="vs-spk" style="bottom:28px;left:75px;--sd:1.8s;--sdl:1.3s">⋆</span>
+        <span class="vs-spk" style="top:45px;right:75px;--sd:2.2s;--sdl:.4s">✧</span>
+        <span class="vs-spk" style="bottom:22px;right:60px;--sd:1.9s;--sdl:1.8s">✦</span>
+        <!-- suit -->
+        <div style="position:relative;width:110px;height:130px;z-index:2">
+          <!-- shoulders -->
+          <div style="position:absolute;top:0;left:0;width:38px;height:14px;background:linear-gradient(180deg,#1e2a48,#121830);border-radius:8px 8px 0 0;transform:rotate(-6deg)"></div>
+          <div style="position:absolute;top:0;right:0;width:38px;height:14px;background:linear-gradient(180deg,#1e2a48,#121830);border-radius:8px 8px 0 0;transform:rotate(6deg)"></div>
+          <!-- jacket body -->
+          <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100px;height:112px;background:linear-gradient(158deg,#1a2240,#121830);border-radius:4px 4px 0 0">
+            <!-- lapel L -->
+            <div style="position:absolute;top:0;left:0;width:0;height:0;border-style:solid;border-width:0 26px 58px 0;border-color:transparent #242e52 transparent transparent"></div>
+            <!-- lapel R -->
+            <div style="position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 0 58px 26px;border-color:transparent transparent transparent #242e52"></div>
+            <!-- shirt -->
+            <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:56px;background:linear-gradient(180deg,#f5f5f0,#e8e8e0)"></div>
+            <!-- tie -->
+            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3">
+              <div style="width:14px;height:10px;background:linear-gradient(158deg,#b03020,#801818);border-radius:3px;margin:0 auto"></div>
+              <div style="width:10px;height:36px;background:linear-gradient(180deg,#982818,#681010);margin:0 auto;clip-path:polygon(10% 0%,90% 0%,100% 80%,50% 100%,0% 80%)"></div>
+            </div>
+            <!-- pocket square -->
+            <div style="position:absolute;top:28px;right:14px;width:14px;height:10px;background:white;clip-path:polygon(0% 40%,50% 0%,100% 40%,100% 100%,0% 100%)"></div>
+            <!-- buttons -->
+            <div style="position:absolute;left:50%;transform:translateX(-50%);top:58px;display:flex;flex-direction:column;gap:8px">
+              <div style="width:5px;height:5px;border-radius:50%;background:#777"></div>
+              <div style="width:5px;height:5px;border-radius:50%;background:#777"></div>
+            </div>
+          </div>
+        </div>
+        <div class="vs-label">✦ &nbsp;SUIT UP!&nbsp; ✦</div>
+      </div>`;
+  }
+
+  else if(type==='horn'){
+    el.innerHTML=`
+      <div class="vis-horn">
+        <div class="vh-glow"></div>
+        <div class="vh-candle" style="left:28px">
+          <div class="vh-flame"></div><div class="vh-wax"></div><div class="vh-base"></div>
+        </div>
+        <div class="vh-candle" style="right:28px">
+          <div class="vh-flame" style="animation-delay:.7s"></div><div class="vh-wax"></div><div class="vh-base"></div>
+        </div>
+        <div class="vh-center">
+          <div style="position:relative;display:inline-block">
+            <div class="vh-horn">📯</div>
+            <span class="vh-note" style="top:-8px;right:-18px;--nd:2.5s;--ndl:0s">♪</span>
+            <span class="vh-note" style="top:5px;left:-20px;--nd:2.8s;--ndl:.9s">♫</span>
+            <span class="vh-note" style="bottom:5px;right:-15px;--nd:2.2s;--ndl:.5s">♩</span>
+          </div>
+          <div class="vh-label">Blue French Horn</div>
+        </div>
+      </div>`;
+  }
+
+  else if(type==='law'){
+    const bkColors = ['#c03020','#2a5a2a','#8b4513','#1a3a7a','#8a8a20','#6a2a8a'];
+    const bkH      = [28,42,34,48,24,38];
+    el.innerHTML=`
+      <div class="vis-law">
+        <div class="vl-glow"></div>
+        <div class="vl-books" style="left:0">
+          ${bkColors.map((c,i)=>`<div class="vl-book" style="width:13px;height:${bkH[i]}px;background:linear-gradient(${c},${c}88)"></div>`).join('')}
+        </div>
+        <div class="vl-center">
+          <div class="vl-scales">⚖️</div>
+          <div class="vl-label">Environmental Lawyer</div>
+          <div class="vl-sub">Marshall Eriksen, Esq.</div>
+        </div>
+        <div class="vl-books" style="right:0">
+          ${[...bkColors].reverse().map((c,i)=>`<div class="vl-book" style="width:13px;height:${bkH[5-i]}px;background:linear-gradient(${c},${c}88)"></div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  else if(type==='playbook'){
+    el.innerHTML=`
+      <div class="vis-pb">
+        <div class="vpb-glow"></div>
+        <span class="vpb-star" style="top:18px;left:38px;font-size:.8rem;--sd:2s;--sdl:0s">★</span>
+        <span class="vpb-star" style="top:28px;right:38px;font-size:.75rem;--sd:2.4s;--sdl:.6s">★</span>
+        <span class="vpb-star" style="bottom:28px;left:58px;font-size:.65rem;--sd:1.9s;--sdl:1.2s">✦</span>
+        <span class="vpb-star" style="bottom:22px;right:52px;font-size:.7rem;--sd:2.2s;--sdl:.9s">✦</span>
+        <span class="vpb-star" style="top:50px;left:18px;font-size:.6rem;--sd:1.8s;--sdl:.3s">⋆</span>
+        <span class="vpb-star" style="top:42px;right:20px;font-size:.6rem;--sd:2.1s;--sdl:1.5s">⋆</span>
+        <div class="bk-wrap">
+          <div class="bk-spine"></div>
+          <div class="bk-cover">
+            <div class="bk-title">THE<br>PLAYBOOK</div>
+          </div>
+          <div class="bk-pages"></div>
+        </div>
+        <div class="vpb-label">Barney Stinson's Strategies</div>
+      </div>`;
+  }
+}
+
+/* ══════════════════════════════════════════
+   GAME FLOW
+══════════════════════════════════════════ */
+function startGame(){
+  state = { currentQuestion:0, score:0, selectedAnswer:null, gameFinished:false };
+  history = [];
+  document.getElementById('score-val').textContent = '0';
+  show('quiz');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q   = QUESTIONS[state.currentQuestion];
+  const tot = QUESTIONS.length;
+  const num = state.currentQuestion + 1;
+
+  document.getElementById('q-lbl').textContent = `Q${num} of ${tot}`;
+  document.getElementById('prog-fill').style.width = ((num-1)/tot*100)+'%';
+
+  buildVisual(q.visual);
+
+  // Animate question text
+  const qb = document.querySelector('.q-body');
+  qb.style.animation='none'; void qb.offsetWidth; qb.style.animation='fadeUp .38s ease both';
+  document.getElementById('q-text').textContent = q.q;
+
+  // Build choices
+  const cg = document.getElementById('choices-grid');
+  cg.style.animation='none'; void cg.offsetWidth; cg.style.animation='fadeUp .42s .05s ease both';
+  cg.innerHTML = q.opts.map((opt,i)=>`
+    <button class="choice-btn" onclick="pick(${i})">
+      <span class="ch-lbl">${LABELS[i]}</span>
+      <span>${opt}</span>
+    </button>`).join('');
+
+  // Reset feedback & next
+  const fb = document.getElementById('feedback');
+  fb.className='feedback'; fb.textContent='';
+  document.getElementById('next-wrap').classList.remove('show');
+  state.selectedAnswer = null;
+}
+
+function pick(idx){
+  if(state.selectedAnswer !== null) return;
+  state.selectedAnswer = idx;
+
+  const q       = QUESTIONS[state.currentQuestion];
+  const correct = idx === q.a;
+
+  if(correct){
+    state.score++;
+    const sv = document.getElementById('score-val');
+    sv.textContent = state.score;
+    sv.classList.remove('score-pop');
+    void sv.offsetWidth;
+    sv.classList.add('score-pop');
+  }
+
+  history.push({ qi:state.currentQuestion, selected:idx, correct });
+
+  // Colour buttons
+  document.querySelectorAll('.choice-btn').forEach((btn,i)=>{
+    btn.disabled = true;
+    if(i===q.a)       btn.classList.add('correct');
+    else if(i===idx)  btn.classList.add('wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback');
+  if(correct){
+    fb.className='feedback ok';
+    fb.innerHTML=`<strong>✓ Correct!</strong> ${q.exp}`;
+  } else {
+    fb.className='feedback err';
+    fb.innerHTML=`<strong>✗ Not quite.</strong> The correct answer was <strong>${LABELS[q.a]}: ${q.opts[q.a]}.</strong> ${q.exp}`;
+  }
+
+  // Next button
+  const wrap = document.getElementById('next-wrap');
+  const btn  = document.getElementById('next-btn');
+  const last = state.currentQuestion === QUESTIONS.length-1;
+  btn.textContent = last ? '🍺  See Results' : 'Next Question →';
+  btn.onclick     = last ? showResults : advance;
+  wrap.classList.add('show');
+}
+
+function advance(){
+  state.currentQuestion++;
+  renderQuestion();
+}
+
+/* ══════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════ */
+function showResults(){
+  document.getElementById('prog-fill').style.width='100%';
+  state.gameFinished = true;
+
+  const s   = state.score;
+  const tot = QUESTIONS.length;
+  const pct = Math.round(s/tot*100);
+
+  document.getElementById('r-emoji').textContent = EMOJIS[s];
+  document.getElementById('r-score').textContent = `${s}/${tot}`;
+  document.getElementById('r-pct').textContent   = `${pct}% correct`;
+  document.getElementById('r-msg').textContent   = MSGS[s];
+
+  // Stars with staggered reveal
+  const starsEl = document.getElementById('r-stars');
+  starsEl.innerHTML='';
+  for(let i=0;i<tot;i++){
+    const sp = document.createElement('span');
+    sp.className = 'star'+(i<s?' on':'');
+    sp.textContent='⭐';
+    if(i>=s) sp.style.filter='grayscale(1)';
+    starsEl.appendChild(sp);
+  }
+  Array.from(starsEl.children).slice(0,s).forEach((star,i)=>{
+    star.style.opacity='0';
+    setTimeout(()=>{
+      star.style.transition='opacity .35s ease,transform .35s ease';
+      star.style.opacity='1';
+      star.style.transform='scale(1.3)';
+      setTimeout(()=>{ star.style.transform='scale(1)'; },350);
+    }, 180+i*190);
+  });
+
+  // Breakdown
+  const bd = document.getElementById('r-breakdown');
+  bd.innerHTML = history.map(h=>{
+    const qd    = QUESTIONS[h.qi];
+    const short = qd.q.length>56 ? qd.q.slice(0,56)+'…' : qd.q;
+    return `<div class="brow">
+      <span class="brow-ico">${h.correct?'✅':'❌'}</span>
+      <span class="brow-q">${h.qi+1}. ${short}</span>
+      <span class="brow-a ${h.correct?'ok':'err'}">${h.correct ? LABELS[h.selected] : LABELS[h.selected]+'→'+LABELS[qd.a]}</span>
+    </div>`;
+  }).join('');
+
+  show('results');
+}
+
+/* ══════════════════════════════════════════
+   FAIRY LIGHTS
+══════════════════════════════════════════ */
+(function(){
+  const el     = document.getElementById('lights');
+  const colors = ['#f0c040','#e09020','#ff7060','#60b0ff','#80ff90','#ffb060'];
+  const n      = Math.max(24, Math.floor(window.innerWidth/22));
+  for(let i=0;i<n;i++){
+    const l = document.createElement('span');
+    l.className='lt';
+    const c=colors[i%colors.length];
+    l.style.cssText=`background:${c};box-shadow:0 0 5px ${c},0 0 12px ${c}`;
+    l.style.setProperty('--d', (1.4+(i*113%16)/10).toFixed(2)+'s');
+    l.style.setProperty('--dl',((i*137)%20/10).toFixed(2)+'s');
+    el.appendChild(l);
+  }
+})();
+</script>
+</body>
+</html>

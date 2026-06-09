@@ -2,20 +2,20 @@
 import { useEffect, useState } from 'react';
 import { type Difficulty } from '@/lib/constants';
 import { lsGet } from '@/lib/storage';
-import { QUESTIONS } from '@/lib/questions';
 
 interface Props {
   onSelect: (diff: Difficulty) => void;
   onBack:   () => void;
+  error?:   string | null;
 }
 
-export default function DifficultyScreen({ onSelect, onBack }: Props) {
+export default function DifficultyScreen({ onSelect, onBack, error }: Props) {
   const [bests, setBests] = useState({ easy: '', medium: '', hard: '' });
 
   useEffect(() => {
     const get = (d: string) => {
       const v = lsGet(`himym_hs_${d}`);
-      return v !== null ? `🏆 Best: ${v} / ${QUESTIONS.length}` : '';
+      return v !== null ? `🏆 Best: ${v}` : '';
     };
     setBests({ easy: get('easy'), medium: get('medium'), hard: get('hard') });
   }, []);
@@ -29,6 +29,23 @@ export default function DifficultyScreen({ onSelect, onBack }: Props) {
         </h2>
         <p className="diff-subtitle">How legendary are you feeling?</p>
       </div>
+
+      {/* API error banner */}
+      {error && (
+        <div style={{
+          width: '100%',
+          padding: '.7rem 1rem',
+          background: 'rgba(192,57,43,.1)',
+          border: '1px solid rgba(192,57,43,.35)',
+          borderRadius: 10,
+          color: '#ffc2bb',
+          fontSize: '.82rem',
+          textAlign: 'center',
+        }}>
+          ⚠️ Couldn&apos;t load live questions — using built-in HIMYM questions instead.<br />
+          <span style={{ opacity: .7 }}>{error}</span>
+        </div>
+      )}
 
       <div className="diff-cards">
         <button className="diff-card diff-easy" onClick={() => onSelect('easy')}>

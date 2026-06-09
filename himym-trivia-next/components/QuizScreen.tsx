@@ -1,9 +1,10 @@
 'use client';
 import { type Answer } from '@/components/TriviaGame';
-import { QUESTIONS, LABELS } from '@/lib/questions';
+import { type Question, LABELS } from '@/lib/questions';
 import { DIFFICULTIES, type Difficulty } from '@/lib/constants';
 
 interface Props {
+  questions:  Question[];
   qi:         number;
   score:      number;
   diff:       Difficulty;
@@ -16,25 +17,25 @@ interface Props {
 }
 
 export default function QuizScreen({
-  qi, score, diff, timeLeft, answers, scoreBump,
+  questions, qi, score, diff, timeLeft, answers, scoreBump,
   onPick, onBack, onForward,
 }: Props) {
-  const q       = QUESTIONS[qi];
-  const total   = QUESTIONS.length;
-  const ans     = answers[qi];
+  const q        = questions[qi];
+  const total    = questions.length;
+  const ans      = answers[qi];
   const answered = ans !== undefined;
-  const isLast  = qi === total - 1;
+  const isLast   = qi === total - 1;
 
-  const totalSecs = DIFFICULTIES[diff].secs;
-  const pct       = Math.max(0, (timeLeft / totalSecs) * 100);
+  const totalSecs  = DIFFICULTIES[diff].secs;
+  const pct        = Math.max(0, (timeLeft / totalSecs) * 100);
   const timerColor =
-    timeLeft > totalSecs * 0.5 ? '#5dbb7a' :
+    timeLeft > totalSecs * 0.5  ? '#5dbb7a' :
     timeLeft > totalSecs * 0.25 ? '#f5c842' : '#e74c3c';
 
   function choiceClass(i: number) {
     if (!answered) return 'choice';
-    if (i === q.a)                       return 'choice correct';
-    if (ans.selected === i && !ans.correct) return 'choice wrong';
+    if (i === q.a)                              return 'choice correct';
+    if (ans.selected === i && !ans.correct)     return 'choice wrong';
     return 'choice';
   }
 
@@ -98,14 +99,16 @@ export default function QuizScreen({
           {ans.selected === -1 ? (
             <>
               <strong>⏱ Time&apos;s up!</strong> The answer was{' '}
-              <strong>{LABELS[q.a]}: {q.opts[q.a]}.</strong> {q.exp}
+              <strong>{LABELS[q.a]}: {q.opts[q.a]}.</strong>{' '}
+              {q.exp && <span style={{ opacity: .8 }}>{q.exp}</span>}
             </>
           ) : ans.correct ? (
-            <><strong>✓ Correct!</strong> {q.exp}</>
+            <><strong>✓ Correct!</strong>{q.exp && <> {q.exp}</>}</>
           ) : (
             <>
               <strong>✗ Not quite.</strong> The answer was{' '}
-              <strong>{LABELS[q.a]}: {q.opts[q.a]}.</strong> {q.exp}
+              <strong>{LABELS[q.a]}: {q.opts[q.a]}.</strong>{' '}
+              {q.exp && <span style={{ opacity: .8 }}>{q.exp}</span>}
             </>
           )}
         </div>

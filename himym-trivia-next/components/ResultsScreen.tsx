@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { type Answer } from '@/components/TriviaGame';
-import { QUESTIONS, EMOJIS, MSGS, LABELS } from '@/lib/questions';
+import { type Question, getEmoji, getMsg, LABELS } from '@/lib/questions';
 import { DIFFICULTIES, type Difficulty } from '@/lib/constants';
 import { lsGet, lsDel } from '@/lib/storage';
 
@@ -13,6 +13,7 @@ interface ScoreRow {
 }
 
 interface Props {
+  questions:   Question[];
   score:       number;
   diff:        Difficulty;
   answers:     Record<number, Answer>;
@@ -22,9 +23,9 @@ interface Props {
 }
 
 export default function ResultsScreen({
-  score, diff, answers, isNewRecord, onPlayAgain, onHome,
+  questions, score, diff, answers, isNewRecord, onPlayAgain, onHome,
 }: Props) {
-  const total   = QUESTIONS.length;
+  const total   = questions.length;
   const [history, setHistory] = useState<ScoreRow[]>([]);
   const barsRef = useRef<HTMLDivElement>(null);
 
@@ -51,13 +52,13 @@ export default function ResultsScreen({
     setHistory([]);
   }
 
-  const hs       = lsGet(`himym_hs_${diff}`) || '0';
-  const medals   = ['🥇', '🥈', '🥉'];
+  const hs        = lsGet(`himym_hs_${diff}`) || '0';
+  const medals    = ['🥇', '🥈', '🥉'];
   const diffLabel = DIFFICULTIES[diff].label;
 
   return (
     <div id="results" className="screen active">
-      <div className="result-emoji">{EMOJIS[score]}</div>
+      <div className="result-emoji">{getEmoji(score, total)}</div>
 
       {/* Stars */}
       <div className="stars-row">
@@ -72,12 +73,12 @@ export default function ResultsScreen({
         <span className="score-caption">out of {total}</span>
       </div>
 
-      <p className="result-msg">{MSGS[score]}</p>
+      <p className="result-msg">{getMsg(score, total)}</p>
       <div className="divider" />
 
       {/* Breakdown */}
       <div className="breakdown">
-        {QUESTIONS.map((q, i) => {
+        {questions.map((q, i) => {
           const h = answers[i];
           if (!h) return null;
           const short = q.q.length > 60 ? q.q.slice(0, 60) + '…' : q.q;
@@ -108,7 +109,7 @@ export default function ResultsScreen({
               const pct    = Math.round((row.score / row.total) * 100);
               const medal  = medals[i] !== undefined ? medals[i] : `${i + 1}.`;
               const dKey   = row.diff || 'easy';
-              const dLabel = (DIFFICULTIES[dKey as Difficulty] && DIFFICULTIES[dKey as Difficulty].label) || dKey;
+              const dLabel = (DIFFICULTIES[dKey as Difficulty]?.label) || dKey;
               return (
                 <div key={i} className={`sb-row${i === 0 ? ' sb-current' : ''}`}>
                   <span className="sb-rank">{medal}</span>
@@ -142,8 +143,8 @@ function StarReveal({ earned, index }: { earned: boolean; index: number }) {
 
   useEffect(() => {
     if (!earned) return;
-    const t1 = setTimeout(() => { setVisible(true); setPopped(true); }, 160 + index * 170);
-    const t2 = setTimeout(() => setPopped(false), 160 + index * 170 + 350);
+    const t1 = setTimeout(() => { setVisible(true); setPopped(true); }, 160 + index * 120);
+    const t2 = setTimeout(() => setPopped(false), 160 + index * 120 + 350);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [earned, index]);
 

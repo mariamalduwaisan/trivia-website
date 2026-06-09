@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { QUESTIONS } from '@/lib/questions';
+import { QUESTIONS, type Question } from '@/lib/questions';
 import { DIFFICULTIES, type Difficulty } from '@/lib/constants';
+import { fetchQuestions } from '@/lib/api';
 import { lsGet, lsSet } from '@/lib/storage';
 import { speakBarney } from '@/lib/voice';
 
@@ -14,26 +15,31 @@ export type Screen = 'welcome' | 'difficulty' | 'quiz' | 'results';
 export interface Answer { selected: number; correct: boolean }
 
 export default function TriviaGame() {
-  const [screen,    setScreen]    = useState<Screen>('welcome');
-  const [qi,        setQi]        = useState(0);
-  const [score,     setScore]     = useState(0);
-  const [diff,      setDiff]      = useState<Difficulty>('easy');
-  const [timeLeft,  setTimeLeft]  = useState(0);
-  const [answers,   setAnswers]   = useState<Record<number, Answer>>({});
-  const [scoreBump, setScoreBump] = useState(false);
-  const [isNew,     setIsNew]     = useState(false);
+  const [screen,      setScreen]      = useState<Screen>('welcome');
+  const [qi,          setQi]          = useState(0);
+  const [score,       setScore]       = useState(0);
+  const [diff,        setDiff]        = useState<Difficulty>('easy');
+  const [timeLeft,    setTimeLeft]    = useState(0);
+  const [answers,     setAnswers]     = useState<Record<number, Answer>>({});
+  const [scoreBump,   setScoreBump]   = useState(false);
+  const [isNew,       setIsNew]       = useState(false);
+  const [questions,   setQuestions]   = useState<Question[]>(QUESTIONS); // live questions
+  const [loading,     setLoading]     = useState(false);
+  const [fetchError,  setFetchError]  = useState<string | null>(null);
 
-  // Refs for use in closures/intervals without stale state
-  const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const qiRef     = useRef(qi);
+  // Refs for stale-closure safety
+  const timerRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+  const qiRef      = useRef(qi);
   const answersRef = useRef(answers);
-  const diffRef   = useRef(diff);
-  const scoreRef  = useRef(score);
+  const diffRef    = useRef(diff);
+  const scoreRef   = useRef(score);
+  const questionsRef = useRef(questions);
 
-  useEffect(() => { qiRef.current     = qi;      }, [qi]);
-  useEffect(() => { answersRef.current = answers; }, [answers]);
-  useEffect(() => { diffRef.current   = diff;     }, [diff]);
-  useEffect(() => { scoreRef.current  = score;    }, [score]);
+  useEffect(() => { qiRef.current       = qi;        }, [qi]);
+  useEffect(() => { answersRef.current  = answers;   }, [answers]);
+  useEffect(() => { diffRef.current     = diff;      }, [diff]);
+  useEffect(() => { scoreRef.current    = score;     }, [score]);
+  useEffect(() => { questionsRef.current = questions; }, [questions]);
 
   // Pre-warm browser TTS
   useEffect(() => {
@@ -43,6 +49,7 @@ export default function TriviaGame() {
     }
   }, []);
 
+  /* ── Timer ── */
   const stopTimer = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
   }, []);
@@ -64,20 +71,16 @@ export default function TriviaGame() {
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         const next = prev - 1;
-        if (next <= 0) {
-          stopTimer();
-          handleTimeout();
-          return 0;
-        }
+        if (next <= 0) { stopTimer(); handleTimeout(); return 0; }
         return next;
       });
     }, 1000);
   }, [stopTimer, handleTimeout]);
 
-  // Start/stop timer when quiz question changes
+  // Start/stop timer whenever screen or question index changes
   useEffect(() => {
     if (screen !== 'quiz') { stopTimer(); return; }
-    if (answers[qi] !== undefined) { stopTimer(); return; } // already answered
+    if (answers[qi] !== undefined) { stopTimer(); return; }
     startTimer(diff);
     return stopTimer;
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,26 +89,43 @@ export default function TriviaGame() {
   // Cleanup on unmount
   useEffect(() => () => stopTimer(), [stopTimer]);
 
-  /* ── Actions ── */
+  /* ── Navigation ── */
   function showDifficulty() { stopTimer(); setScreen('difficulty'); }
   function goHome()          { stopTimer(); setScreen('welcome'); }
 
-  function selectDifficulty(d: Difficulty) {
+  /* ── Difficulty + API fetch ── */
+  async function selectDifficulty(d: Difficulty) {
     setDiff(d);
     diffRef.current = d;
+    setLoading(true);
+    setFetchError(null);
+
+    let qs: Question[] = QUESTIONS; // fallback
+    try {
+      qs = await fetchQuestions(d, 10);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not load questions.';
+      setFetchError(msg);
+      qs = QUESTIONS; // use built-in HIMYM questions as fallback
+    }
+
+    setQuestions(qs);
+    questionsRef.current = qs;
     setQi(0);
     setScore(0);
     setAnswers({});
     answersRef.current = {};
+    setLoading(false);
     setScreen('quiz');
   }
 
+  /* ── Answer picking ── */
   function pick(idx: number) {
     const currentQi = qiRef.current;
     if (answersRef.current[currentQi] !== undefined) return;
     stopTimer();
 
-    const q       = QUESTIONS[currentQi];
+    const q       = questionsRef.current[currentQi];
     const correct = idx === q.a;
     const newAnswers = { ...answersRef.current, [currentQi]: { selected: idx, correct } };
     answersRef.current = newAnswers;
@@ -130,7 +150,7 @@ export default function TriviaGame() {
   function goForward() {
     if (answersRef.current[qiRef.current] === undefined) return;
     stopTimer();
-    if (qi === QUESTIONS.length - 1) {
+    if (qi === questionsRef.current.length - 1) {
       const newRecord = saveScore(score);
       setIsNew(newRecord);
       setScreen('results');
@@ -140,7 +160,7 @@ export default function TriviaGame() {
   }
 
   function saveScore(s: number): boolean {
-    const total  = QUESTIONS.length;
+    const total  = questionsRef.current.length;
     const d      = diffRef.current;
     const hsKey  = `himym_hs_${d}`;
     const prev   = parseInt(lsGet(hsKey) || '-1', 10);
@@ -154,17 +174,36 @@ export default function TriviaGame() {
     return isNewR;
   }
 
-  /* ── Render one screen at a time ── */
+  /* ── Render ── */
   return (
     <div id="card">
-      {screen === 'welcome' && (
+
+      {/* Loading overlay while fetching questions */}
+      {loading && (
+        <div id="difficulty" className="screen active">
+          <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+            <div className="umbrella" style={{ fontSize: '3rem', marginBottom: '1.2rem' }}>☂️</div>
+            <p style={{ color: 'var(--gold)', fontSize: '1.1rem', fontStyle: 'italic' }}>
+              Legen— wait for it…
+            </p>
+            <p style={{ color: 'var(--muted)', fontSize: '.85rem', marginTop: '.4rem' }}>
+              Loading your questions
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!loading && screen === 'welcome' && (
         <WelcomeScreen onStart={showDifficulty} />
       )}
-      {screen === 'difficulty' && (
-        <DifficultyScreen onSelect={selectDifficulty} onBack={goHome} />
+
+      {!loading && screen === 'difficulty' && (
+        <DifficultyScreen onSelect={selectDifficulty} onBack={goHome} error={fetchError} />
       )}
-      {screen === 'quiz' && (
+
+      {!loading && screen === 'quiz' && (
         <QuizScreen
+          questions={questions}
           qi={qi}
           score={score}
           diff={diff}
@@ -176,8 +215,10 @@ export default function TriviaGame() {
           onForward={goForward}
         />
       )}
-      {screen === 'results' && (
+
+      {!loading && screen === 'results' && (
         <ResultsScreen
+          questions={questions}
           score={score}
           diff={diff}
           answers={answers}
@@ -186,6 +227,7 @@ export default function TriviaGame() {
           onHome={goHome}
         />
       )}
+
       <div id="card-foot">MacLaren&apos;s Pub · New York City · Est. 2005</div>
     </div>
   );

@@ -38,15 +38,26 @@ export const QUESTIONS: Question[] = [
   }
 ];
 
-export const EMOJIS = ['😢', '😕', '🤔', '😊', '🍺', '🏆'];
-
-export const MSGS = [
-  "Oof… even Barney feels sorry for you. Maybe binge-watch the show one more time?",
-  "Not quite, but you'd get kicked out of MacLaren's with that score. Keep watching!",
-  "Decent! You know the show, but there's still room to become a true HIMYM legend.",
-  "Nice work! You're practically a regular at MacLaren's booth.",
-  "Impressive! Barney would say this calls for a celebratory high-five.",
-  "LEGEN— wait for it —DARY! You're the ultimate HIMYM fan. Ted would be proud! ☂️"
-];
-
 export const LABELS = ['A', 'B', 'C', 'D'];
+
+/** Percentage-based emoji — works for any question count */
+export function getEmoji(score: number, total: number): string {
+  const p = total === 0 ? 0 : score / total;
+  if (p === 0)  return '😢';
+  if (p <= 0.3) return '😕';
+  if (p <= 0.5) return '🤔';
+  if (p <= 0.7) return '😊';
+  if (p < 1)    return '🍺';
+  return '🏆';
+}
+
+/** Percentage-based result message — works for any question count */
+export function getMsg(score: number, total: number): string {
+  const p = total === 0 ? 0 : score / total;
+  if (p === 0)  return "Oof… even Barney feels sorry for you. Maybe binge-watch the show one more time?";
+  if (p <= 0.3) return "Not quite, but you'd get kicked out of MacLaren's with that score. Keep watching!";
+  if (p <= 0.5) return "Decent! You know the show, but there's still room to become a true HIMYM legend.";
+  if (p <= 0.7) return "Nice work! You're practically a regular at MacLaren's booth.";
+  if (p < 1)    return "Impressive! Barney would say this calls for a celebratory high-five.";
+  return "LEGEN— wait for it —DARY! You're the ultimate HIMYM fan. Ted would be proud! ☂️";
+}

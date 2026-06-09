@@ -23,7 +23,7 @@ export default function WelcomeScreen({ onStart }: Props) {
 
       <div className="stat-row">
         <div className="stat">
-          <span className="sv">5</span>
+          <span className="sv">10</span>
           <span className="sl">Questions</span>
         </div>
         <div className="stat">

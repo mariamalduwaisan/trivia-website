@@ -98,7 +98,15 @@
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Desktop frame — shows around the phone-width body */
+  background: #c8d9ef;
+}
+html[data-theme="dark"] { background: #060e1c; }
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg);
@@ -106,13 +114,19 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   transition: background-color .35s ease, color .35s ease;
+  /* Phone-width constraint */
+  max-width: 430px;
+  margin: 0 auto;
+  /* Subtle elevation from desktop background */
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08), 0 8px 40px rgba(0,0,0,.18);
 }
+
 a { color: var(--rx-blue); text-decoration: none; transition: opacity .2s; }
 a:hover { opacity: .8; text-decoration: underline; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 button:focus-visible { outline: 2px solid var(--rx-blue); outline-offset: 3px; border-radius: var(--radius-sm); }
 img { display: block; max-width: 100%; }
-.container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.container { width: 100%; padding: 0 18px; }
 
 /* ── Keyframes ── */
 @keyframes fadeInUp {
@@ -191,7 +205,7 @@ img { display: block; max-width: 100%; }
 ═══════════════════════════════════════════ */
 .hero {
   position: relative; overflow: hidden;
-  padding: 80px 0 70px;
+  padding: 44px 0 36px;
   text-align: center;
 }
 .hero::before {
@@ -229,9 +243,9 @@ img { display: block; max-width: 100%; }
 .rx-badge-cross { font-size: .85rem; font-weight: 900; }
 
 .hero-title {
-  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
-  font-weight: 800; line-height: 1.12; letter-spacing: -.035em;
-  color: var(--text); margin-bottom: 18px;
+  font-size: 1.9rem;
+  font-weight: 800; line-height: 1.15; letter-spacing: -.035em;
+  color: var(--text); margin-bottom: 14px;
   animation: fadeInUp .6s ease .08s both;
 }
 .hero-accent {
@@ -239,8 +253,8 @@ img { display: block; max-width: 100%; }
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .hero-subtitle {
-  font-size: 1.08rem; color: var(--text-2); line-height: 1.7;
-  max-width: 520px; margin: 0 auto 36px;
+  font-size: .95rem; color: var(--text-2); line-height: 1.65;
+  max-width: 100%; margin: 0 auto 24px;
   animation: fadeInUp .6s ease .14s both;
 }
 .br-desktop { display: none; }
@@ -251,8 +265,8 @@ img { display: block; max-width: 100%; }
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 22px 22px 18px;
-  max-width: 680px; margin: 0 auto 24px;
+  padding: 16px 16px 14px;
+  max-width: 100%; margin: 0 auto 18px;
   box-shadow: var(--shadow-md);
   animation: fadeInUp .6s ease .2s both;
   transition: border-color .25s ease, box-shadow .25s ease;
@@ -288,13 +302,14 @@ img { display: block; max-width: 100%; }
 .search-input::-webkit-search-cancel-button { cursor: pointer; }
 
 .search-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 11px 22px; border-radius: var(--radius-md);
+  display: flex; align-items: center; gap: 6px;
+  padding: 11px 16px; border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--rx-blue) 0%, var(--rx-teal) 100%);
-  color: #fff; font-weight: 600; font-size: .94rem;
+  color: #fff; font-weight: 600; font-size: .88rem;
   white-space: nowrap; flex-shrink: 0;
   box-shadow: 0 4px 14px rgba(37,99,235,.30);
   transition: var(--trans);
+  min-height: 44px; /* iOS touch target */
 }
 .search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.40); filter: brightness(1.07); }
 .search-btn:active { transform: scale(.98); }
@@ -329,13 +344,13 @@ img { display: block; max-width: 100%; }
 /* ═══════════════════════════════════════════
    RESULTS SECTION
 ═══════════════════════════════════════════ */
-.results-section { padding: 0 0 88px; }
+.results-section { padding: 0 0 56px; }
 
 /* Share bar */
 .share-bar {
   display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px;
-  padding: 13px 20px; margin-bottom: 40px;
+  flex-wrap: wrap; gap: 10px;
+  padding: 11px 16px; margin-bottom: 24px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-md); box-shadow: var(--shadow-xs);
   animation: fadeIn .4s ease both;
@@ -356,7 +371,7 @@ img { display: block; max-width: 100%; }
 .share-link-btn.copied { border-color: var(--rx-teal); color: var(--rx-teal); background: var(--rx-teal-lt); }
 
 /* Result blocks */
-.result-block { margin-bottom: 52px; }
+.result-block { margin-bottom: 36px; }
 
 /* Shelf header */
 .section-shelf-header {
@@ -415,8 +430,8 @@ img { display: block; max-width: 100%; }
 
 /* Banner (top part with thumbnail + description) */
 .disease-banner {
-  display: flex; gap: 22px; align-items: flex-start;
-  padding: 28px;
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 20px 18px;
   background: linear-gradient(135deg, var(--rx-blue-xlt) 0%, var(--surface) 60%);
   border-bottom: 1px solid var(--border);
 }
@@ -439,8 +454,8 @@ img { display: block; max-width: 100%; }
 
 .disease-main { flex: 1; min-width: 0; }
 .disease-name {
-  font-size: 1.7rem; font-weight: 800; letter-spacing: -.03em;
-  color: var(--text); line-height: 1.2; margin-bottom: 10px;
+  font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em;
+  color: var(--text); line-height: 1.2; margin-bottom: 8px;
 }
 .disease-desc { font-size: .9rem; color: var(--text-2); line-height: 1.7; margin-bottom: 14px; }
 .wiki-btn {
@@ -453,7 +468,7 @@ img { display: block; max-width: 100%; }
 .wiki-btn:hover { border-color: var(--rx-blue); color: var(--rx-blue); background: var(--rx-blue-xlt); text-decoration: none; }
 
 /* Info panel (symptom/causes/prevention/risks grid) */
-.disease-info-panel { padding: 24px 28px; }
+.disease-info-panel { padding: 16px 18px; }
 .info-panel-label {
   display: flex; align-items: center; gap: 7px;
   font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
@@ -461,8 +476,11 @@ img { display: block; max-width: 100%; }
 }
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 360px) {
+  .info-grid { grid-template-columns: 1fr; }
 }
 .info-box {
   background: var(--bg-2); border: 1.5px solid var(--border);
@@ -485,8 +503,8 @@ img { display: block; max-width: 100%; }
 ═══════════════════════════════════════════ */
 .medicine-shelf {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  gap: 22px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 /* Each card is a "product on a pharmacy shelf" */
@@ -612,25 +630,26 @@ img { display: block; max-width: 100%; }
 .toast.hide { animation: toastOut .3s cubic-bezier(.4,0,.2,1) forwards; }
 
 /* ═══════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — all mobile-first at 430px
 ═══════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .hero { padding: 52px 0 44px; }
-  .hero-title { font-size: 2.1rem; }
-  .counter-box { padding: 16px 16px 14px; }
-  .search-btn { padding: 10px 16px; font-size: .88rem; }
-  .btn-arrow { display: none; }
-  .share-bar { flex-direction: column; align-items: flex-start; }
-  .disease-banner { flex-direction: column; gap: 16px; padding: 20px; }
-  .disease-thumb, .disease-thumb-placeholder { width: 62px; height: 62px; font-size: 1.6rem; }
-  .disease-name { font-size: 1.35rem; }
-  .disease-info-panel { padding: 18px; }
-  .info-grid { grid-template-columns: 1fr; }
-  .medicine-shelf { grid-template-columns: 1fr; }
-  .section-shelf-header { flex-direction: column; align-items: flex-start; }
-  .footer-inner { flex-direction: column; text-align: center; }
-}
-@media (max-width: 440px) {
+
+/* Always single-column layout tweaks */
+.btn-arrow { display: none; }
+.section-shelf-header { flex-wrap: wrap; }
+.footer-inner { flex-direction: column; text-align: center; gap: 8px; }
+.disease-thumb { width: 64px; height: 64px; }
+.disease-thumb-placeholder { width: 64px; height: 64px; font-size: 1.8rem; }
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .hero { padding: 32px 0 28px; }
+  .hero-title { font-size: 1.6rem; }
   .theme-label { display: none; }
-  .popular-searches { gap: 6px; }
+  .popular-searches { gap: 5px; }
+  .pill-tag { font-size: .75rem; padding: 4px 10px; }
+}
+
+/* Slightly larger than iPhone (tablet/desktop) — restore some desktop sizing */
+@media (min-width: 600px) {
+  .medicine-shelf { grid-template-columns: 1fr; } /* keep single col */
 }

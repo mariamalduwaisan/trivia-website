@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedSearch Rx — Your Digital Pharmacy Guide</title>
+  <meta name="description" content="Search diseases and related medications in one clean, organized place. Educational resource powered by Wikipedia and FDA OpenData." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ══════════════════ HEADER ══════════════════ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo" aria-label="MedSearch home">
+        <div class="logo-cross" aria-hidden="true">✚</div>
+        <span class="logo-name">MedSearch</span>
+        <span class="logo-rx" aria-label="Rx">Rx</span>
+      </a>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark mode">
+        <span class="theme-icon sun" aria-hidden="true">☀️</span>
+        <span class="theme-icon moon" aria-hidden="true">🌙</span>
+        <span class="theme-label" id="theme-label">Dark Mode</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ══════════════════ HERO / PHARMACY COUNTER ══════════════════ -->
+    <section class="hero" id="hero">
+
+      <!-- Floating ambient icons (decorative) -->
+      <div class="hero-floats" aria-hidden="true">
+        <span class="fi" style="--x:6%;  --y:18%; --s:2.4rem; --d:0s">💊</span>
+        <span class="fi" style="--x:87%; --y:12%; --s:2rem;   --d:.6s">🩺</span>
+        <span class="fi" style="--x:93%; --y:52%; --s:1.8rem; --d:1.2s">🔬</span>
+        <span class="fi" style="--x:4%;  --y:72%; --s:1.6rem; --d:1.8s">🛡️</span>
+        <span class="fi" style="--x:80%; --y:78%; --s:2rem;   --d:2.4s">🧬</span>
+        <span class="fi" style="--x:14%; --y:88%; --s:1.5rem; --d:3s">💉</span>
+        <span class="fi" style="--x:50%; --y:5%;  --s:1.4rem; --d:3.6s">✚</span>
+      </div>
+
+      <div class="container hero-inner">
+        <!-- Pharmacy badge -->
+        <div class="rx-badge" aria-hidden="true">
+          <span class="rx-badge-cross">✚</span> Your Digital Pharmacy Guide
+        </div>
+
+        <h1 class="hero-title">
+          Find Disease &amp;<br />
+          <span class="hero-accent">Medicine Information</span>
+        </h1>
+        <p class="hero-subtitle">
+          Search symptoms, diseases, and related medicines<br class="br-desktop" />
+          in one clean, organized place.
+        </p>
+
+        <!-- Pharmacy Counter -->
+        <div class="counter-box">
+          <div class="counter-label" aria-hidden="true">
+            <span>✚</span> Pharmacy Search Counter
+          </div>
+          <form class="search-form" id="search-form" role="search" aria-label="Disease search">
+            <div class="search-row">
+              <span class="search-icon-wrap" aria-hidden="true">🔍</span>
+              <input
+                type="search"
+                id="search-input"
+                class="search-input"
+                placeholder="Search a disease or condition…"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                aria-label="Search for a disease"
+              />
+              <button type="submit" class="search-btn" id="search-btn">
+                Search Now <span class="btn-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </form>
+          <div class="popular-searches">
+            <span class="pop-label">Popular:</span>
+            <button class="pill-tag" data-query="diabetes">💊 Diabetes</button>
+            <button class="pill-tag" data-query="asthma">🫁 Asthma</button>
+            <button class="pill-tag" data-query="hypertension">❤️ Hypertension</button>
+            <button class="pill-tag" data-query="migraine">🧠 Migraine</button>
+          </div>
+        </div>
+
+        <!-- Safety notice -->
+        <div class="safety-banner" role="note">
+          <span class="safety-cross" aria-hidden="true">⚕️</span>
+          <p>
+            <strong>This website is for educational purposes only and is not medical advice.</strong>
+            Always consult a healthcare professional before taking medicine.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ RESULTS ══════════════════ -->
+    <section class="results-section" id="results" hidden aria-live="polite">
+      <div class="container">
+
+        <!-- Share / query bar -->
+        <div class="share-bar" id="share-bar">
+          <div class="share-query-text">
+            <span aria-hidden="true">🔍</span>
+            Results for: <strong id="current-query"></strong>
+          </div>
+          <button class="share-link-btn" id="copy-link-btn" aria-label="Copy shareable link">
+            <span aria-hidden="true">🔗</span>
+            <span id="share-btn-text">Copy Share Link</span>
+          </button>
+        </div>
+
+        <!-- ── DISEASE OVERVIEW PANEL ── -->
+        <div class="result-block" id="disease-block">
+          <div class="section-shelf-header">
+            <div class="shelf-title-group">
+              <span class="shelf-icon" aria-hidden="true">🦠</span>
+              <h2 class="shelf-heading">Disease Overview</h2>
+            </div>
+            <span class="source-chip wiki">📚 Wikipedia</span>
+          </div>
+          <div id="disease-content"></div>
+        </div>
+
+        <!-- ── MEDICINE CABINET ── -->
+        <div class="result-block" id="medicine-block">
+          <div class="section-shelf-header">
+            <div class="shelf-title-group">
+              <span class="shelf-icon" aria-hidden="true">🗄️</span>
+              <h2 class="shelf-heading">Medicine Cabinet</h2>
+            </div>
+            <div class="shelf-meta-right">
+              <span class="med-count-badge" id="med-count" hidden></span>
+              <span class="source-chip fda">🏛️ FDA OpenData</span>
+            </div>
+          </div>
+          <div id="medicine-content"></div>
+        </div>
+
+        <!-- Full disclaimer -->
+        <div class="disclaimer-panel" role="note">
+          <div class="disclaimer-panel-header">
+            <span aria-hidden="true">⚕️</span>
+            <strong>Medical Disclaimer</strong>
+          </div>
+          <p>
+            This website is for <strong>educational purposes only</strong> and is <strong>not medical advice</strong>.
+            Information is sourced from publicly available databases (Wikipedia &amp; FDA OpenData)
+            and may not be complete or up to date.
+            <strong>Always consult a qualified healthcare professional</strong> before taking any medication
+            or making health decisions. Never ignore professional medical advice because of something you read here.
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-cross" aria-hidden="true">✚</span>
+        MedSearch <span class="footer-rx">Rx</span>
+      </div>
+      <p class="footer-copy">
+        Powered by
+        <a href="https://www.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a>
+        &amp;
+        <a href="https://open.fda.gov" target="_blank" rel="noopener noreferrer">FDA OpenData</a>
+        · For educational use only
+      </p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

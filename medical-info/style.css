@@ -1,0 +1,636 @@
+/* ═══════════════════════════════════════════
+   MEDSEARCH Rx — Pharmacy Design System
+═══════════════════════════════════════════ */
+
+/* ── Design Tokens ── */
+:root {
+  --rx-blue:        #2563eb;
+  --rx-blue-dk:     #1d4ed8;
+  --rx-blue-lt:     #dbeafe;
+  --rx-blue-xlt:    #eff6ff;
+  --rx-teal:        #0d9488;
+  --rx-teal-dk:     #0f766e;
+  --rx-teal-lt:     #ccfbf1;
+  --rx-mint:        #ecfdf5;
+  --rx-navy:        #1e3a5c;
+  --rx-purple:      #7c3aed;
+  --rx-emerald:     #059669;
+  --rx-amber:       #d97706;
+  --rx-amber-lt:    #fef3c7;
+  --rx-amber-bdr:   #f59e0b;
+  --rx-amber-txt:   #92400e;
+  --rx-red:         #dc2626;
+  --rx-red-lt:      #fef2f2;
+  --rx-red-bdr:     #f87171;
+  --rx-red-txt:     #b91c1c;
+
+  --bg:             #eef5ff;
+  --bg-2:           #f8fbff;
+  --surface:        #ffffff;
+  --card:           #ffffff;
+  --text:           #1e293b;
+  --text-2:         #475569;
+  --text-3:         #94a3b8;
+  --border:         #dde8f5;
+  --border-2:       #e2e8f0;
+
+  --shadow-xs:      0 1px 3px rgba(30,58,92,.06);
+  --shadow-sm:      0 2px 8px rgba(30,58,92,.08);
+  --shadow-md:      0 4px 20px rgba(30,58,92,.10);
+  --shadow-lg:      0 10px 40px rgba(30,58,92,.12);
+  --shadow-blue:    0 8px 30px rgba(37,99,235,.18);
+  --shadow-hover:   0 16px 48px rgba(37,99,235,.20);
+
+  --radius-sm:      8px;
+  --radius-md:      14px;
+  --radius-lg:      20px;
+  --radius-xl:      28px;
+  --radius-full:    9999px;
+
+  --trans:          all .25s cubic-bezier(.4,0,.2,1);
+  --trans-slow:     all .4s cubic-bezier(.4,0,.2,1);
+
+  --skel-base:      #dde8f5;
+  --skel-shine:     #eef5ff;
+}
+
+[data-theme="dark"] {
+  --rx-blue:        #60a5fa;
+  --rx-blue-dk:     #3b82f6;
+  --rx-blue-lt:     #0c2340;
+  --rx-blue-xlt:    #081b33;
+  --rx-teal:        #2dd4bf;
+  --rx-teal-dk:     #14b8a6;
+  --rx-teal-lt:     #032928;
+  --rx-mint:        #022c22;
+  --rx-navy:        #93c5fd;
+  --rx-purple:      #a78bfa;
+  --rx-emerald:     #34d399;
+  --rx-amber:       #fbbf24;
+  --rx-amber-lt:    #1a1000;
+  --rx-amber-bdr:   #d97706;
+  --rx-amber-txt:   #fcd34d;
+  --rx-red:         #f87171;
+  --rx-red-lt:      #1f0707;
+  --rx-red-bdr:     #dc2626;
+  --rx-red-txt:     #fca5a5;
+
+  --bg:             #08111f;
+  --bg-2:           #0b1929;
+  --surface:        #0d1f38;
+  --card:           #102040;
+  --text:           #e2e8f0;
+  --text-2:         #94a3b8;
+  --text-3:         #64748b;
+  --border:         #1a3050;
+  --border-2:       #1e3a5f;
+
+  --shadow-xs:      0 1px 3px rgba(0,0,0,.4);
+  --shadow-sm:      0 2px 8px rgba(0,0,0,.45);
+  --shadow-md:      0 4px 20px rgba(0,0,0,.5);
+  --shadow-lg:      0 10px 40px rgba(0,0,0,.55);
+  --shadow-blue:    0 8px 30px rgba(96,165,250,.12);
+  --shadow-hover:   0 16px 48px rgba(96,165,250,.14);
+
+  --skel-base:      #1a3050;
+  --skel-shine:     #1e3a5f;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color .35s ease, color .35s ease;
+}
+a { color: var(--rx-blue); text-decoration: none; transition: opacity .2s; }
+a:hover { opacity: .8; text-decoration: underline; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+button:focus-visible { outline: 2px solid var(--rx-blue); outline-offset: 3px; border-radius: var(--radius-sm); }
+img { display: block; max-width: 100%; }
+.container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Keyframes ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0)   rotate(0deg); }
+  33%      { transform: translateY(-10px) rotate(-4deg); }
+  66%      { transform: translateY(5px)  rotate(2deg); }
+}
+@keyframes toastIn  { from { opacity:0; transform:translateX(-50%) translateY(16px) scale(.94); } to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } }
+@keyframes toastOut { from { opacity:1; transform:translateX(-50%) translateY(0) scale(1); } to { opacity:0; transform:translateX(-50%) translateY(16px) scale(.94); } }
+
+.animate-fade-up { animation: fadeInUp .5s cubic-bezier(.4,0,.2,1) both; }
+.animate-delay-1 { animation-delay: .06s; }
+.animate-delay-2 { animation-delay: .13s; }
+.animate-delay-3 { animation-delay: .20s; }
+.animate-delay-4 { animation-delay: .27s; }
+.animate-delay-5 { animation-delay: .34s; }
+.animate-delay-6 { animation-delay: .41s; }
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  transition: background-color .35s ease, border-color .35s ease;
+}
+.header-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 16px; }
+
+.logo {
+  display: flex; align-items: center; gap: 9px;
+  color: var(--text); text-decoration: none;
+}
+.logo:hover { opacity: .85; text-decoration: none; }
+
+.logo-cross {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--rx-blue) 0%, var(--rx-teal) 100%);
+  color: #fff; font-size: 1rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-blue);
+  flex-shrink: 0;
+}
+.logo-name { font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
+.logo-rx {
+  font-size: .65rem; font-weight: 700; letter-spacing: .06em;
+  background: var(--rx-blue-lt); color: var(--rx-blue);
+  padding: 2px 7px; border-radius: var(--radius-full);
+  border: 1px solid var(--rx-blue); opacity: .85;
+}
+
+.theme-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text-2); font-size: .84rem; font-weight: 500;
+  white-space: nowrap; transition: var(--trans);
+}
+.theme-btn:hover { border-color: var(--rx-blue); color: var(--rx-blue); background: var(--rx-blue-xlt); }
+.theme-icon { font-size: 1rem; line-height: 1; }
+[data-theme="light"] .moon { display: none; }
+[data-theme="dark"]  .sun  { display: none; }
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 80px 0 70px;
+  text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 50% at 50% -5%, rgba(37,99,235,.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 90%, rgba(13,148,136,.07) 0%, transparent 60%);
+}
+[data-theme="dark"] .hero::before {
+  background:
+    radial-gradient(ellipse 65% 50% at 50% -5%, rgba(96,165,250,.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 90%, rgba(45,212,191,.06) 0%, transparent 60%);
+}
+
+/* Floating icons */
+.hero-floats { position: absolute; inset: 0; pointer-events: none; user-select: none; }
+.fi {
+  position: absolute; left: var(--x); top: var(--y); font-size: var(--s);
+  opacity: .09; animation: float 8s ease-in-out infinite; animation-delay: var(--d);
+}
+[data-theme="dark"] .fi { opacity: .05; }
+
+.hero-inner { position: relative; max-width: 780px; }
+
+/* Pharmacy badge */
+.rx-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 16px; border-radius: var(--radius-full);
+  background: var(--rx-blue-lt); border: 1px solid var(--rx-blue);
+  color: var(--rx-blue); font-size: .72rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase; margin-bottom: 24px;
+  animation: fadeIn .6s ease both;
+}
+.rx-badge-cross { font-size: .85rem; font-weight: 900; }
+
+.hero-title {
+  font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+  font-weight: 800; line-height: 1.12; letter-spacing: -.035em;
+  color: var(--text); margin-bottom: 18px;
+  animation: fadeInUp .6s ease .08s both;
+}
+.hero-accent {
+  background: linear-gradient(120deg, var(--rx-blue) 0%, var(--rx-teal) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-subtitle {
+  font-size: 1.08rem; color: var(--text-2); line-height: 1.7;
+  max-width: 520px; margin: 0 auto 36px;
+  animation: fadeInUp .6s ease .14s both;
+}
+.br-desktop { display: none; }
+@media (min-width: 640px) { .br-desktop { display: block; } }
+
+/* ── Pharmacy Counter Box ── */
+.counter-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 22px 22px 18px;
+  max-width: 680px; margin: 0 auto 24px;
+  box-shadow: var(--shadow-md);
+  animation: fadeInUp .6s ease .2s both;
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+.counter-box:focus-within {
+  border-color: var(--rx-blue);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.10), var(--shadow-md);
+}
+[data-theme="dark"] .counter-box:focus-within {
+  box-shadow: 0 0 0 4px rgba(96,165,250,.10), var(--shadow-md);
+}
+
+.counter-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--rx-teal); margin-bottom: 12px; padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.search-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 6px 6px 6px 16px;
+  transition: border-color .2s ease;
+}
+.counter-box:focus-within .search-row { border-color: var(--rx-blue); }
+.search-icon-wrap { font-size: 1.1rem; flex-shrink: 0; }
+.search-input {
+  flex: 1; min-width: 0; border: none; background: transparent;
+  font-family: inherit; font-size: 1rem; color: var(--text); outline: none;
+}
+.search-input::placeholder { color: var(--text-3); }
+.search-input::-webkit-search-cancel-button { cursor: pointer; }
+
+.search-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--rx-blue) 0%, var(--rx-teal) 100%);
+  color: #fff; font-weight: 600; font-size: .94rem;
+  white-space: nowrap; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(37,99,235,.30);
+  transition: var(--trans);
+}
+.search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.40); filter: brightness(1.07); }
+.search-btn:active { transform: scale(.98); }
+.btn-arrow { transition: transform .2s ease; }
+.search-btn:hover .btn-arrow { transform: translateX(3px); }
+
+/* Popular searches */
+.popular-searches {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 8px; margin-top: 14px;
+}
+.pop-label { font-size: .78rem; color: var(--text-3); font-weight: 500; }
+.pill-tag {
+  padding: 5px 14px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--bg-2);
+  color: var(--text-2); font-size: .8rem; font-weight: 500;
+  transition: var(--trans);
+}
+.pill-tag:hover { border-color: var(--rx-blue); color: var(--rx-blue); background: var(--rx-blue-xlt); transform: translateY(-1px); }
+
+/* Safety banner */
+.safety-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  max-width: 660px; margin: 0 auto;
+  padding: 13px 18px; border-radius: var(--radius-md);
+  background: var(--rx-amber-lt); border: 1px solid var(--rx-amber-bdr);
+  text-align: left; animation: fadeInUp .6s ease .28s both;
+}
+.safety-cross { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.safety-banner p { font-size: .83rem; color: var(--rx-amber-txt); line-height: 1.55; }
+
+/* ═══════════════════════════════════════════
+   RESULTS SECTION
+═══════════════════════════════════════════ */
+.results-section { padding: 0 0 88px; }
+
+/* Share bar */
+.share-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  padding: 13px 20px; margin-bottom: 40px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-xs);
+  animation: fadeIn .4s ease both;
+}
+.share-query-text {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .9rem; color: var(--text-2);
+}
+.share-query-text strong { color: var(--text); font-weight: 600; }
+.share-link-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 18px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text-2); font-size: .84rem; font-weight: 500;
+  transition: var(--trans);
+}
+.share-link-btn:hover { border-color: var(--rx-blue); color: var(--rx-blue); background: var(--rx-blue-xlt); }
+.share-link-btn.copied { border-color: var(--rx-teal); color: var(--rx-teal); background: var(--rx-teal-lt); }
+
+/* Result blocks */
+.result-block { margin-bottom: 52px; }
+
+/* Shelf header */
+.section-shelf-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--border);
+}
+.shelf-title-group { display: flex; align-items: center; gap: 10px; }
+.shelf-icon { font-size: 1.4rem; }
+.shelf-heading { font-size: 1.3rem; font-weight: 800; letter-spacing: -.025em; color: var(--text); }
+.shelf-meta-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Source chips */
+.source-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 13px; border-radius: var(--radius-full);
+  font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+}
+.source-chip.wiki  { background: var(--rx-blue-lt); color: var(--rx-blue); border: 1px solid var(--rx-blue); }
+.source-chip.fda   { background: var(--rx-teal-lt); color: var(--rx-teal); border: 1px solid var(--rx-teal); }
+
+/* Medicine count badge */
+.med-count-badge {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: var(--radius-full);
+  background: var(--rx-blue-xlt); color: var(--rx-blue);
+  font-size: .78rem; font-weight: 600; border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   SKELETON LOADERS
+═══════════════════════════════════════════ */
+.skel {
+  background: linear-gradient(90deg, var(--skel-base) 25%, var(--skel-shine) 50%, var(--skel-base) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: var(--radius-sm);
+}
+.skel-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ═══════════════════════════════════════════
+   DISEASE CARD — Medical Info Panel
+═══════════════════════════════════════════ */
+.disease-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow .3s ease, transform .3s ease;
+}
+.disease-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+/* Banner (top part with thumbnail + description) */
+.disease-banner {
+  display: flex; gap: 22px; align-items: flex-start;
+  padding: 28px;
+  background: linear-gradient(135deg, var(--rx-blue-xlt) 0%, var(--surface) 60%);
+  border-bottom: 1px solid var(--border);
+}
+[data-theme="dark"] .disease-banner {
+  background: linear-gradient(135deg, rgba(96,165,250,.06) 0%, var(--card) 60%);
+}
+
+.disease-thumb {
+  width: 80px; height: 80px; border-radius: var(--radius-md);
+  object-fit: cover; flex-shrink: 0;
+  border: 2px solid var(--border); box-shadow: var(--shadow-xs);
+}
+.disease-thumb-placeholder {
+  width: 80px; height: 80px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--rx-blue-lt) 0%, var(--rx-teal-lt) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; flex-shrink: 0;
+  border: 2px solid var(--border);
+}
+
+.disease-main { flex: 1; min-width: 0; }
+.disease-name {
+  font-size: 1.7rem; font-weight: 800; letter-spacing: -.03em;
+  color: var(--text); line-height: 1.2; margin-bottom: 10px;
+}
+.disease-desc { font-size: .9rem; color: var(--text-2); line-height: 1.7; margin-bottom: 14px; }
+.wiki-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--text-2); font-size: .8rem; font-weight: 500;
+  text-decoration: none; transition: var(--trans);
+}
+.wiki-btn:hover { border-color: var(--rx-blue); color: var(--rx-blue); background: var(--rx-blue-xlt); text-decoration: none; }
+
+/* Info panel (symptom/causes/prevention/risks grid) */
+.disease-info-panel { padding: 24px 28px; }
+.info-panel-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 16px;
+}
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+.info-box {
+  background: var(--bg-2); border: 1.5px solid var(--border);
+  border-radius: var(--radius-md); padding: 15px 17px;
+  transition: var(--trans);
+}
+.info-box:hover { border-color: var(--rx-blue); background: var(--rx-blue-xlt); }
+.info-box-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--rx-blue); margin-bottom: 9px;
+}
+.info-box-text {
+  font-size: .855rem; color: var(--text-2); line-height: 1.65; white-space: pre-line;
+}
+.no-data { opacity: .45; font-style: italic; }
+
+/* ═══════════════════════════════════════════
+   MEDICINE CABINET — Pharmacy Shelf Cards
+═══════════════════════════════════════════ */
+.medicine-shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 22px;
+}
+
+/* Each card is a "product on a pharmacy shelf" */
+.med-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-top: 4px solid var(--card-accent, var(--rx-blue));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: box-shadow .3s ease, transform .3s ease, border-color .3s ease;
+}
+.med-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+
+/* Card top: icon + name */
+.med-card-top {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+[data-theme="dark"] .med-card-top { background: rgba(255,255,255,.02); }
+
+.med-pill-badge {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: var(--card-accent, var(--rx-blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.med-names { flex: 1; min-width: 0; }
+.med-brand {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em;
+  color: var(--text); line-height: 1.3; margin-bottom: 3px;
+}
+.med-generic { font-size: .78rem; color: var(--text-3); font-style: italic; margin-bottom: 3px; }
+.med-mfr { font-size: .75rem; color: var(--text-3); }
+
+/* Card body: drug info rows */
+.med-card-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+.med-row { display: flex; gap: 11px; align-items: flex-start; }
+.med-row-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; line-height: 1; }
+.med-row-label {
+  font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--rx-teal); margin-bottom: 4px;
+}
+.med-row-text { font-size: .845rem; color: var(--text-2); line-height: 1.62; }
+
+/* Warning box */
+.med-warn-box {
+  margin-top: 2px;
+  padding: 12px 14px; border-radius: var(--radius-md);
+  background: var(--rx-red-lt); border: 1px solid var(--rx-red-bdr);
+}
+.med-warn-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--rx-red); margin-bottom: 6px;
+}
+.med-warn-text { font-size: .83rem; color: var(--rx-red-txt); line-height: 1.58; }
+
+/* ═══════════════════════════════════════════
+   STATE CARDS — Empty / Error
+═══════════════════════════════════════════ */
+.state-card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 52px 32px;
+  text-align: center; box-shadow: var(--shadow-sm);
+}
+.state-icon { font-size: 3rem; margin-bottom: 14px; }
+.state-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.state-msg { font-size: .9rem; color: var(--text-2); line-height: 1.6; max-width: 380px; margin: 0 auto; }
+
+.state-card.error {
+  background: var(--rx-red-lt); border-color: var(--rx-red-bdr);
+}
+.state-card.error .state-title { color: var(--rx-red-txt); }
+.state-card.error .state-msg   { color: var(--rx-red-txt); opacity: .8; }
+
+/* ═══════════════════════════════════════════
+   DISCLAIMER PANEL
+═══════════════════════════════════════════ */
+.disclaimer-panel {
+  margin-top: 44px; padding: 20px 24px;
+  background: var(--rx-amber-lt); border: 1px solid var(--rx-amber-bdr);
+  border-radius: var(--radius-md);
+}
+.disclaimer-panel-header {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .9rem; font-weight: 700; color: var(--rx-amber-txt);
+  margin-bottom: 8px;
+}
+.disclaimer-panel p { font-size: .85rem; color: var(--rx-amber-txt); line-height: 1.7; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.site-footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 24px 0; transition: background-color .35s ease;
+}
+.footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-brand { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: .95rem; color: var(--text); }
+.footer-cross { font-size: 1rem; color: var(--rx-blue); }
+.footer-rx { font-size: .65rem; font-weight: 700; color: var(--rx-teal); letter-spacing: .05em; }
+.footer-copy { font-size: .8rem; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 26px; left: 50%; z-index: 999;
+  transform: translateX(-50%) translateY(16px) scale(.94);
+  background: var(--rx-navy); color: #fff;
+  padding: 12px 26px; border-radius: var(--radius-full);
+  font-size: .875rem; font-weight: 500;
+  box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; white-space: nowrap;
+}
+[data-theme="dark"] .toast { background: var(--rx-blue); }
+.toast.show { animation: toastIn .3s cubic-bezier(.4,0,.2,1) forwards; }
+.toast.hide { animation: toastOut .3s cubic-bezier(.4,0,.2,1) forwards; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hero { padding: 52px 0 44px; }
+  .hero-title { font-size: 2.1rem; }
+  .counter-box { padding: 16px 16px 14px; }
+  .search-btn { padding: 10px 16px; font-size: .88rem; }
+  .btn-arrow { display: none; }
+  .share-bar { flex-direction: column; align-items: flex-start; }
+  .disease-banner { flex-direction: column; gap: 16px; padding: 20px; }
+  .disease-thumb, .disease-thumb-placeholder { width: 62px; height: 62px; font-size: 1.6rem; }
+  .disease-name { font-size: 1.35rem; }
+  .disease-info-panel { padding: 18px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .medicine-shelf { grid-template-columns: 1fr; }
+  .section-shelf-header { flex-direction: column; align-items: flex-start; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+@media (max-width: 440px) {
+  .theme-label { display: none; }
+  .popular-searches { gap: 6px; }
+}
